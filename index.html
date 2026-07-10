@@ -298,9 +298,9 @@
 
     .week-board {
       display: grid;
-      grid-template-columns: 96px repeat(14, minmax(82px, 1fr));
-      grid-template-rows: 72px repeat(3, 126px);
-      min-width: 1244px;
+      grid-template-columns: 112px repeat(14, 118px);
+      grid-template-rows: 68px repeat(3, 118px);
+      min-width: 1764px;
     }
 
     .board-corner,
@@ -312,6 +312,9 @@
     }
 
     .board-corner {
+      position: sticky;
+      left: 0;
+      z-index: 4;
       display: grid;
       align-items: end;
       padding: 12px;
@@ -324,8 +327,8 @@
     .date-cell {
       display: grid;
       align-content: center;
-      gap: 5px;
-      padding: 10px;
+      gap: 2px;
+      padding: 10px 12px;
       background: rgba(255, 250, 240, .92);
     }
 
@@ -335,33 +338,39 @@
 
     .date {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
+      align-items: flex-start;
+      flex-direction: column;
+      justify-content: center;
       gap: 8px;
     }
 
     .date strong {
       font-family: Georgia, serif;
-      font-size: 24px;
+      font-size: 23px;
       line-height: 1;
     }
 
     .date span {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
+      line-height: 1;
     }
 
     .row-label {
+      position: sticky;
+      left: 0;
+      z-index: 3;
       display: grid;
       align-content: center;
       gap: 4px;
-      padding: 9px 10px;
-      background: rgba(255, 250, 240, .84);
+      padding: 10px 12px;
+      background: rgba(255, 250, 240, .96);
     }
 
     .row-label strong {
       font-size: 12px;
       line-height: 1.25;
+      white-space: nowrap;
     }
 
     .row-label span {
@@ -374,7 +383,7 @@
       display: grid;
       align-content: center;
       min-height: 0;
-      padding: 7px;
+      padding: 8px;
       background: rgba(255, 255, 255, .48);
       transition: border-color .16s ease, transform .16s ease, background .16s ease;
     }
@@ -395,7 +404,7 @@
     .slot.all-day .empty-state {
       width: 100%;
       height: 100%;
-      min-height: 330px;
+      min-height: 318px;
     }
 
     .slot.all-day .assignment-chip {
@@ -442,7 +451,7 @@
     .slot-menu-button {
       position: absolute;
       top: 50%;
-      right: 14px;
+      right: 13px;
       display: grid;
       width: 28px;
       height: 28px;
@@ -519,8 +528,8 @@
       justify-content: center;
       width: 100%;
       height: 100%;
-      min-height: 82px;
-      padding: 10px 42px 10px 10px;
+      min-height: 78px;
+      padding: 10px 40px 10px 12px;
       cursor: grab;
       font-size: 17px;
     }
@@ -1123,7 +1132,7 @@
 
     function renderBoard() {
       board.innerHTML = "";
-      board.style.gridTemplateColumns = `96px repeat(${VISIBLE_DAYS}, minmax(82px, 1fr))`;
+      board.style.gridTemplateColumns = `112px repeat(${VISIBLE_DAYS}, 118px)`;
       const weekdaySlots = modules[state.activeModule].weekdaySlots;
       const corner = document.createElement("div");
       corner.className = "board-corner";
