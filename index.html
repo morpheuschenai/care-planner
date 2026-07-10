@@ -1687,9 +1687,17 @@
       return events;
     }
 
+    function normalizeSyncToken(value) {
+      const token = String(value || "").trim();
+      if (token.includes("=")) {
+        return token.split("=").pop().trim();
+      }
+      return token;
+    }
+
     async function syncToCalendar() {
       const defaultToken = localStorage.getItem(SYNC_TOKEN_KEY) || "";
-      const syncToken = prompt("請輸入同步 token", defaultToken);
+      const syncToken = normalizeSyncToken(prompt("請輸入同步密碼", defaultToken));
       if (!syncToken) return;
       localStorage.setItem(SYNC_TOKEN_KEY, syncToken);
 
@@ -1709,6 +1717,10 @@
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem(SYNC_TOKEN_KEY);
+            throw new Error("同步密碼不正確，已清除舊密碼，請重新輸入");
+          }
           throw new Error(result.error || "同步失敗");
         }
         showToast(`已同步 ${result.inserted || events.length} 筆`);
