@@ -279,7 +279,7 @@
 
     .workspace {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 280px;
+      grid-template-columns: minmax(0, 1fr);
       gap: 18px;
       align-items: start;
     }
@@ -294,6 +294,10 @@
 
     .board-wrap {
       overflow: auto;
+    }
+
+    .inspector {
+      display: none;
     }
 
     .mobile-person-dock {
@@ -461,9 +465,9 @@
       height: 28px;
       place-items: center;
       color: currentColor;
-      background: rgba(255, 250, 240, .72);
-      border: 1px solid rgba(216, 205, 185, .72);
-      border-radius: 50%;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
       opacity: 0;
       transform: translateY(-50%) scale(.96);
       transition: opacity .14s ease, transform .14s ease;
@@ -921,11 +925,12 @@
 
       .mobile-slot-row .slot-menu-button {
         right: 10px;
+        top: 50%;
       }
 
       .slot-menu-button {
         opacity: 1 !important;
-        transform: none !important;
+        transform: translateY(-50%) scale(1) !important;
       }
     }
   </style>
@@ -992,6 +997,9 @@
           <button class="icon-button" id="nextWeek" type="button" title="下一週" aria-label="下一週">
             <svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
           </button>
+          <button class="text-button" id="todayAction" type="button">今天</button>
+          <button class="text-button" id="togglePastAction" type="button">顯示過去</button>
+          <button class="text-button" id="syncCalendar" type="button">同步日曆</button>
           <button class="icon-button" id="undoAction" type="button" title="復原" aria-label="復原">
             <svg class="icon" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
           </button>
@@ -1054,6 +1062,9 @@
 
   <script>
     const STORAGE_KEY = "family-ops-care-module-v2";
+    const SYNC_URL_KEY = "family-ops-care-sync-url";
+    const SYNC_TOKEN_KEY = "family-ops-care-sync-token";
+    const CARE_PLANNER_CALENDAR_ID = "f6v16h6sav5134f00ovglhunqo@group.calendar.google.com";
     const VISIBLE_DAYS = 14;
     const MOBILE_QUERY = "(max-width: 720px)";
 
@@ -1095,7 +1106,8 @@
       weekStart: "2026-07-09",
       activeModule: "childcare",
       assignments: structuredClone(initialAssignments),
-      notes: {}
+      notes: {},
+      showPast: false
     };
 
     const history = {
@@ -1115,6 +1127,8 @@
     const noteInput = document.querySelector("#noteInput");
     const undoButton = document.querySelector("#undoAction");
     const redoButton = document.querySelector("#redoAction");
+    const todayButton = document.querySelector("#todayAction");
+    const togglePastButton = document.querySelector("#togglePastAction");
     let activeSlot = null;
 
     function toDate(dateKey) {
@@ -1139,6 +1153,28 @@
       return `${date.getMonth() + 1}/${date.getDate()}`;
     }
 
+    function todayKey() {
+      return toKey(new Date());
+    }
+
+    function compareDateKeys(a, b) {
+      return a.localeCompare(b);
+    }
+
+    function earliestAssignmentKey() {
+      const keys = Object.keys(state.assignments).sort();
+      return keys[0] || todayKey();
+    }
+
+    function visibleStartDate() {
+      const today = todayKey();
+      if (state.showPast) {
+        const earliest = earliestAssignmentKey();
+        return compareDateKeys(earliest, today) < 0 ? earliest : today;
+      }
+      return compareDateKeys(state.weekStart, today) < 0 ? today : state.weekStart;
+    }
+
     function getSlots(dateKey) {
       const day = toDate(dateKey).getDay();
       return day === 0 || day === 6
@@ -1147,7 +1183,8 @@
     }
 
     function getWeekDates() {
-      return Array.from({ length: VISIBLE_DAYS }, (_, index) => addDays(state.weekStart, index));
+      const start = visibleStartDate();
+      return Array.from({ length: VISIBLE_DAYS }, (_, index) => addDays(start, index));
     }
 
     function saveState() {
@@ -1164,6 +1201,10 @@
         state.activeModule = parsed.activeModule || state.activeModule;
         state.assignments = parsed.assignments || state.assignments;
         state.notes = parsed.notes || {};
+        state.showPast = Boolean(parsed.showPast);
+        if (!state.showPast && compareDateKeys(state.weekStart, todayKey()) < 0) {
+          state.weekStart = todayKey();
+        }
       } catch {
         showToast("讀取儲存資料失敗，已使用初始版本");
       }
@@ -1174,7 +1215,8 @@
         weekStart: state.weekStart,
         activeModule: state.activeModule,
         assignments: structuredClone(state.assignments),
-        notes: structuredClone(state.notes)
+        notes: structuredClone(state.notes),
+        showPast: state.showPast
       };
     }
 
@@ -1183,6 +1225,7 @@
       state.activeModule = nextState.activeModule;
       state.assignments = structuredClone(nextState.assignments);
       state.notes = structuredClone(nextState.notes || {});
+      state.showPast = Boolean(nextState.showPast);
       closePopover();
       render();
     }
@@ -1288,6 +1331,7 @@
       renderBoard();
       renderSummary();
       updateHistoryButtons();
+      togglePastButton.textContent = state.showPast ? "隱藏過去" : "顯示過去";
     }
 
     function renderBoard() {
@@ -1558,6 +1602,68 @@
       showToast("已產生日曆檔");
     }
 
+    function buildSyncEvents() {
+      const events = [];
+      Object.entries(state.assignments).forEach(([dateKey, slots]) => {
+        getSlots(dateKey).forEach((slot) => {
+          const personId = slots[slot.id];
+          if (!personId) return;
+          const note = getSlotNote(dateKey, slot.id);
+          const event = {
+            date: dateKey,
+            slotId: slot.id,
+            slotLabel: slot.label,
+            personId,
+            personLabel: people[personId].label,
+            summary: `${slot.label} - ${people[personId].label}`,
+            note,
+            allDay: Boolean(slot.allDay)
+          };
+          if (!slot.allDay) {
+            event.startTime = slot.calendarTime[0];
+            event.endTime = slot.calendarTime[1];
+          }
+          events.push(event);
+        });
+      });
+      return events;
+    }
+
+    async function syncToCalendar() {
+      const defaultUrl = localStorage.getItem(SYNC_URL_KEY) || "";
+      const syncUrl = prompt("請貼上 Railway 同步 API URL", defaultUrl);
+      if (!syncUrl) return;
+      localStorage.setItem(SYNC_URL_KEY, syncUrl);
+
+      const defaultToken = localStorage.getItem(SYNC_TOKEN_KEY) || "";
+      const syncToken = prompt("請輸入同步 token", defaultToken);
+      if (!syncToken) return;
+      localStorage.setItem(SYNC_TOKEN_KEY, syncToken);
+
+      const events = buildSyncEvents();
+      try {
+        const response = await fetch(syncUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${syncToken}`
+          },
+          body: JSON.stringify({
+            calendarId: CARE_PLANNER_CALENDAR_ID,
+            source: "care-planner",
+            events
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(result.error || "同步失敗");
+        }
+        showToast(`已同步 ${result.inserted || events.length} 筆`);
+      } catch (error) {
+        showToast(error.message || "同步失敗");
+      }
+    }
+
     document.querySelectorAll(".person-card").forEach((card) => {
       card.addEventListener("dragstart", (event) => {
         setDragPayload(event, { personId: card.dataset.person });
@@ -1568,14 +1674,28 @@
     undoButton.addEventListener("click", undo);
     redoButton.addEventListener("click", redo);
     document.querySelector("#prevWeek").addEventListener("click", () => {
-      state.weekStart = addDays(state.weekStart, -7);
+      const nextStart = addDays(visibleStartDate(), -7);
+      state.weekStart = state.showPast || compareDateKeys(nextStart, todayKey()) >= 0 ? nextStart : todayKey();
       render();
     });
     document.querySelector("#nextWeek").addEventListener("click", () => {
-      state.weekStart = addDays(state.weekStart, 7);
+      state.weekStart = addDays(visibleStartDate(), 7);
+      state.showPast = false;
+      render();
+    });
+    todayButton.addEventListener("click", () => {
+      state.weekStart = todayKey();
+      state.showPast = false;
+      render();
+      showToast("已回到今天");
+    });
+    togglePastButton.addEventListener("click", () => {
+      state.showPast = !state.showPast;
+      state.weekStart = state.showPast ? earliestAssignmentKey() : todayKey();
       render();
     });
     document.querySelector("#downloadIcs").addEventListener("click", downloadIcs);
+    document.querySelector("#syncCalendar").addEventListener("click", syncToCalendar);
     document.querySelector("#closePopover").addEventListener("click", closePopover);
     document.querySelector("#saveNote").addEventListener("click", () => {
       if (!activeSlot) return;
