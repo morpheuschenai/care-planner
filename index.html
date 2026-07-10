@@ -296,6 +296,10 @@
       overflow: auto;
     }
 
+    .mobile-person-dock {
+      display: none;
+    }
+
     .week-board {
       display: grid;
       grid-template-columns: 112px repeat(14, 118px);
@@ -763,19 +767,160 @@
         padding: 16px;
       }
 
+      .sidebar {
+        display: none;
+      }
+
       .topbar {
         align-items: stretch;
         flex-direction: column;
+        margin-bottom: 12px;
       }
 
       .actions {
         justify-content: flex-start;
       }
 
+      .title-block h2 {
+        font-size: 34px;
+      }
+
+      .time-rules {
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .time-rule {
+        min-height: 31px;
+        padding: 6px 8px;
+      }
+
       .person-tray,
       .module-list,
       .stat-grid {
         grid-template-columns: 1fr;
+      }
+
+      .mobile-person-dock {
+        position: sticky;
+        top: 0;
+        z-index: 12;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 4px;
+        padding: 8px;
+        background: rgba(247, 243, 234, .92);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        backdrop-filter: blur(10px);
+      }
+
+      .mobile-person-dock .person-card {
+        min-height: 38px;
+        padding: 8px 10px;
+        box-shadow: none;
+      }
+
+      .mobile-person-dock .drag-handle {
+        width: 24px;
+        height: 24px;
+      }
+
+      .workspace {
+        gap: 6px;
+      }
+
+      .board-wrap {
+        overflow: visible;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .week-board.mobile-board {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .mobile-day {
+        overflow: hidden;
+        background: rgba(255, 250, 240, .9);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: 0 10px 24px rgba(63, 49, 30, .08);
+      }
+
+      .mobile-day-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 250, 240, .96);
+      }
+
+      .mobile-day-header strong {
+        font-family: Georgia, serif;
+        font-size: 24px;
+      }
+
+      .mobile-day-header span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .mobile-slot-row {
+        display: grid;
+        grid-template-columns: 82px minmax(0, 1fr);
+        min-height: 58px;
+        border-bottom: 1px solid rgba(216, 205, 185, .72);
+      }
+
+      .mobile-slot-row:last-child {
+        border-bottom: 0;
+      }
+
+      .mobile-slot-label {
+        display: grid;
+        align-content: center;
+        gap: 2px;
+        padding: 8px 10px;
+        color: var(--ink);
+        background: rgba(255, 250, 240, .78);
+        border-right: 1px solid rgba(216, 205, 185, .72);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .mobile-slot-label span {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      .mobile-slot-row .slot {
+        min-height: 58px;
+        padding: 6px;
+        border: 0;
+        border-bottom: 0;
+      }
+
+      .mobile-slot-row .assignment-chip,
+      .mobile-slot-row .empty-state {
+        min-height: 46px;
+      }
+
+      .mobile-slot-row .slot.all-day .assignment-chip,
+      .mobile-slot-row .slot.all-day .empty-state {
+        min-height: 46px;
+      }
+
+      .mobile-slot-row .slot-menu-button {
+        right: 10px;
       }
 
       .slot-menu-button {
@@ -858,6 +1003,20 @@
       </header>
 
       <div class="workspace">
+        <div class="mobile-person-dock" aria-label="手機可拖曳成員">
+          <div class="person-card" data-person="mo" draggable="true">
+            <strong>Mo</strong>
+            <span class="drag-handle" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
+            </span>
+          </div>
+          <div class="person-card" data-person="lisa" draggable="true">
+            <strong>Lisa</strong>
+            <span class="drag-handle" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
+            </span>
+          </div>
+        </div>
         <section class="board-wrap" aria-label="分工月曆">
           <div class="week-board" id="weekBoard"></div>
         </section>
@@ -896,6 +1055,7 @@
   <script>
     const STORAGE_KEY = "family-ops-care-module-v2";
     const VISIBLE_DAYS = 14;
+    const MOBILE_QUERY = "(max-width: 720px)";
 
     const people = {
       mo: { id: "mo", label: "Mo" },
@@ -1132,6 +1292,11 @@
 
     function renderBoard() {
       board.innerHTML = "";
+      board.className = "week-board";
+      if (window.matchMedia(MOBILE_QUERY).matches) {
+        renderMobileBoard();
+        return;
+      }
       board.style.gridTemplateColumns = `112px repeat(${VISIBLE_DAYS}, 118px)`;
       const weekdaySlots = modules[state.activeModule].weekdaySlots;
       const corner = document.createElement("div");
@@ -1184,6 +1349,36 @@
           slotEl.style.gridRow = String(slotIndex + 2);
           board.appendChild(slotEl);
         });
+      });
+    }
+
+    function renderMobileBoard() {
+      board.className = "week-board mobile-board";
+      board.style.gridTemplateColumns = "";
+
+      getWeekDates().forEach((dateKey) => {
+        const date = toDate(dateKey);
+        const dayEl = document.createElement("article");
+        dayEl.className = "mobile-day";
+
+        const header = document.createElement("header");
+        header.className = "mobile-day-header";
+        header.innerHTML = `<strong>${formatDate(dateKey)}</strong><span>${weekdayLabels[date.getDay()]}</span>`;
+        dayEl.appendChild(header);
+
+        getSlots(dateKey).forEach((slot) => {
+          const row = document.createElement("div");
+          row.className = "mobile-slot-row";
+
+          const label = document.createElement("div");
+          label.className = "mobile-slot-label";
+          label.innerHTML = `<strong>${slot.label}</strong><span>${slot.allDay ? "整日" : slot.calendarTime[0]}</span>`;
+
+          row.append(label, renderSlot(dateKey, slot));
+          dayEl.appendChild(row);
+        });
+
+        board.appendChild(dayEl);
       });
     }
 
@@ -1407,6 +1602,8 @@
         redo();
       }
     });
+
+    window.matchMedia(MOBILE_QUERY).addEventListener("change", render);
 
     loadState();
     render();
