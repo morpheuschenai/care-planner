@@ -231,10 +231,12 @@
       gap: 8px;
       min-height: 36px;
       padding: 8px 11px;
+      color: var(--ink);
       background: rgba(255, 250, 240, .84);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: 0 6px 18px rgba(55, 43, 28, .06);
+      text-align: left;
     }
 
     .time-rule strong {
@@ -243,8 +245,14 @@
 
     .time-rule span {
       color: var(--muted);
-      font-family: Georgia, serif;
-      font-size: 15px;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .time-rule svg {
+      width: 14px;
+      height: 14px;
+      opacity: .54;
     }
 
     .actions {
@@ -371,7 +379,6 @@
       z-index: 3;
       display: grid;
       align-content: center;
-      gap: 4px;
       padding: 10px 12px;
       background: rgba(255, 250, 240, .96);
     }
@@ -380,11 +387,6 @@
       font-size: 12px;
       line-height: 1.25;
       white-space: nowrap;
-    }
-
-    .row-label span {
-      color: var(--muted);
-      font-size: 11px;
     }
 
     .slot {
@@ -892,19 +894,12 @@
       .mobile-slot-label {
         display: grid;
         align-content: center;
-        gap: 2px;
         padding: 8px 10px;
         color: var(--ink);
         background: rgba(255, 250, 240, .78);
         border-right: 1px solid rgba(216, 205, 185, .72);
         font-size: 12px;
         font-weight: 700;
-      }
-
-      .mobile-slot-label span {
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 500;
       }
 
       .mobile-slot-row .slot {
@@ -983,13 +978,8 @@
     <main class="main">
       <header class="topbar">
         <div class="title-block">
-          <h2>七月照顧分工</h2>
-          <div class="time-rules" aria-label="固定時段">
-            <div class="time-rule"><strong>早上送託</strong><span>7:30</span></div>
-            <div class="time-rule"><strong>放學接回</strong><span>15:30</span></div>
-            <div class="time-rule"><strong>晚間照顧</strong><span>晚間</span></div>
-            <div class="time-rule"><strong>週末</strong><span>整日</span></div>
-          </div>
+          <h2>照顧分工</h2>
+          <div class="time-rules" id="timeRules" aria-label="接送與照顧時間規則"></div>
         </div>
         <div class="actions">
           <button class="icon-button" id="prevWeek" type="button" title="上一週" aria-label="上一週">
@@ -1104,11 +1094,19 @@
       "2026-07-19": { all_day_care: "mo" }
     };
 
+    const defaultTimeRules = {
+      morning_dropoff: "預設 7:30，可依孩子調整",
+      school_pickup: "預設 15:30，可依星期調整",
+      evening_care: "依當日晚間安排",
+      all_day_care: "週末整日"
+    };
+
     const state = {
       weekStart: "2026-07-09",
       activeModule: "childcare",
       assignments: structuredClone(initialAssignments),
       notes: {},
+      timeRules: structuredClone(defaultTimeRules),
       showPast: false,
       visibleDays: INITIAL_VISIBLE_DAYS
     };
@@ -1121,6 +1119,7 @@
     const weekdayLabels = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
     const board = document.querySelector("#weekBoard");
     const boardWrap = document.querySelector(".board-wrap");
+    const timeRules = document.querySelector("#timeRules");
     const stats = document.querySelector("#stats");
     const timeline = document.querySelector("#timeline");
     const toast = document.querySelector("#toast");
@@ -1206,6 +1205,7 @@
         state.activeModule = parsed.activeModule || state.activeModule;
         state.assignments = parsed.assignments || state.assignments;
         state.notes = parsed.notes || {};
+        state.timeRules = { ...defaultTimeRules, ...(parsed.timeRules || {}) };
         state.showPast = Boolean(parsed.showPast);
         state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(parsed.visibleDays) || INITIAL_VISIBLE_DAYS);
         if (!state.showPast && compareDateKeys(state.weekStart, todayKey()) < 0) {
@@ -1222,6 +1222,7 @@
         activeModule: state.activeModule,
         assignments: structuredClone(state.assignments),
         notes: structuredClone(state.notes),
+        timeRules: structuredClone(state.timeRules),
         showPast: state.showPast,
         visibleDays: state.visibleDays
       };
@@ -1232,6 +1233,7 @@
       state.activeModule = nextState.activeModule;
       state.assignments = structuredClone(nextState.assignments);
       state.notes = structuredClone(nextState.notes || {});
+      state.timeRules = { ...defaultTimeRules, ...(nextState.timeRules || {}) };
       state.showPast = Boolean(nextState.showPast);
       state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(nextState.visibleDays) || INITIAL_VISIBLE_DAYS);
       closePopover();
@@ -1335,7 +1337,42 @@
       showToast(trimmed ? "已儲存備註" : "已清除備註");
     }
 
+    function allDisplaySlots() {
+      const module = modules[state.activeModule];
+      return [...module.weekdaySlots, ...module.weekendSlots];
+    }
+
+    function renderTimeRules() {
+      timeRules.innerHTML = "";
+      allDisplaySlots().forEach((slot) => {
+        const button = document.createElement("button");
+        button.className = "time-rule";
+        button.type = "button";
+        button.innerHTML = `
+          <strong>${slot.label}</strong>
+          <span>${state.timeRules[slot.id] || "尚未設定"}</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        `;
+        button.addEventListener("click", () => editTimeRule(slot));
+        timeRules.appendChild(button);
+      });
+    }
+
+    function editTimeRule(slot) {
+      const current = state.timeRules[slot.id] || "";
+      const next = prompt(
+        `編輯「${slot.label}」時間規則\n例如：真真 7:30 / 樂樂 8:00；或 樂樂週一 14:00、週二 15:00、週三 18:00 / 真真 15:30`,
+        current
+      );
+      if (next === null) return;
+      commitHistory();
+      state.timeRules[slot.id] = next.trim() || defaultTimeRules[slot.id] || "";
+      render();
+      showToast("已更新時間規則");
+    }
+
     function render() {
+      renderTimeRules();
       renderBoard();
       renderSummary();
       updateHistoryButtons();
@@ -1427,7 +1464,7 @@
         label.className = "row-label";
         label.style.gridColumn = "1";
         label.style.gridRow = String(index + 2);
-        label.innerHTML = `<strong>${slot.label}</strong><span>${slot.calendarTime[0]}</span>`;
+        label.innerHTML = `<strong>${slot.label}</strong>`;
         board.appendChild(label);
       });
 
@@ -1475,7 +1512,7 @@
 
           const label = document.createElement("div");
           label.className = "mobile-slot-label";
-          label.innerHTML = `<strong>${slot.label}</strong><span>${slot.allDay ? "整日" : slot.calendarTime[0]}</span>`;
+          label.innerHTML = `<strong>${slot.label}</strong>`;
 
           row.append(label, renderSlot(dateKey, slot));
           dayEl.appendChild(row);
@@ -1558,7 +1595,7 @@
     function openSlotMenu(slotEl, dateKey, slot) {
       activeSlot = { dateKey, slotId: slot.id };
       popoverTitle.textContent = `${formatDate(dateKey)} ${slot.label}`;
-      popoverSubtitle.textContent = slot.allDay ? "整日安排" : slot.calendarTime[0];
+      popoverSubtitle.textContent = state.timeRules[slot.id] || (slot.allDay ? "整日安排" : slot.calendarTime[0]);
       noteInput.value = getSlotNote(dateKey, slot.id);
       personMenu.innerHTML = Object.values(people).map((person) => `
         <button class="person-choice" data-person="${person.id}" type="button">${person.label}</button>
