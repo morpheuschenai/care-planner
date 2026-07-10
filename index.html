@@ -1062,8 +1062,8 @@
 
   <script>
     const STORAGE_KEY = "family-ops-care-module-v2";
-    const SYNC_URL_KEY = "family-ops-care-sync-url";
     const SYNC_TOKEN_KEY = "family-ops-care-sync-token";
+    const CARE_PLANNER_SYNC_URL = "https://web-production-ee902.up.railway.app/api/care-planner/sync";
     const CARE_PLANNER_CALENDAR_ID = "f6v16h6sav5134f00ovglhunqo@group.calendar.google.com";
     const INITIAL_VISIBLE_DAYS = 14;
     const EXTEND_DAYS = 7;
@@ -1688,11 +1688,6 @@
     }
 
     async function syncToCalendar() {
-      const defaultUrl = localStorage.getItem(SYNC_URL_KEY) || "";
-      const syncUrl = prompt("請貼上 Railway 同步 API URL", defaultUrl);
-      if (!syncUrl) return;
-      localStorage.setItem(SYNC_URL_KEY, syncUrl);
-
       const defaultToken = localStorage.getItem(SYNC_TOKEN_KEY) || "";
       const syncToken = prompt("請輸入同步 token", defaultToken);
       if (!syncToken) return;
@@ -1700,7 +1695,7 @@
 
       const events = buildSyncEvents();
       try {
-        const response = await fetch(syncUrl, {
+        const response = await fetch(CARE_PLANNER_SYNC_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
