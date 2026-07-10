@@ -1117,6 +1117,7 @@
 
     const weekdayLabels = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
     const board = document.querySelector("#weekBoard");
+    const boardWrap = document.querySelector(".board-wrap");
     const stats = document.querySelector("#stats");
     const timeline = document.querySelector("#timeline");
     const toast = document.querySelector("#toast");
@@ -1334,6 +1335,25 @@
       togglePastButton.textContent = state.showPast ? "隱藏過去" : "顯示過去";
     }
 
+    function scrollToToday() {
+      const today = todayKey();
+      requestAnimationFrame(() => {
+        if (window.matchMedia(MOBILE_QUERY).matches) {
+          const todayCard = board.querySelector(`.mobile-day[data-date="${today}"]`);
+          if (todayCard) {
+            const dock = document.querySelector(".mobile-person-dock");
+            const dockHeight = dock ? dock.getBoundingClientRect().height : 0;
+            const targetTop = todayCard.getBoundingClientRect().top + window.scrollY - dockHeight - 12;
+            window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+          }
+          return;
+        }
+        if (boardWrap) {
+          boardWrap.scrollTo({ left: 0, behavior: "smooth" });
+        }
+      });
+    }
+
     function renderBoard() {
       board.innerHTML = "";
       board.className = "week-board";
@@ -1353,6 +1373,7 @@
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
         const header = document.createElement("header");
         header.className = `date-cell${isWeekend ? " weekend" : ""}`;
+        header.dataset.date = dateKey;
         header.style.gridColumn = String(index + 2);
         header.style.gridRow = "1";
         header.innerHTML = `
@@ -1404,6 +1425,7 @@
         const date = toDate(dateKey);
         const dayEl = document.createElement("article");
         dayEl.className = "mobile-day";
+        dayEl.dataset.date = dateKey;
 
         const header = document.createElement("header");
         header.className = "mobile-day-header";
@@ -1687,6 +1709,7 @@
       state.weekStart = todayKey();
       state.showPast = false;
       render();
+      scrollToToday();
       showToast("已回到今天");
     });
     togglePastButton.addEventListener("click", () => {
