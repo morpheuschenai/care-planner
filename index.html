@@ -1065,7 +1065,8 @@
     const SYNC_URL_KEY = "family-ops-care-sync-url";
     const SYNC_TOKEN_KEY = "family-ops-care-sync-token";
     const CARE_PLANNER_CALENDAR_ID = "f6v16h6sav5134f00ovglhunqo@group.calendar.google.com";
-    const VISIBLE_DAYS = 14;
+    const INITIAL_VISIBLE_DAYS = 14;
+    const EXTEND_DAYS = 7;
     const MOBILE_QUERY = "(max-width: 720px)";
 
     const people = {
@@ -1107,7 +1108,8 @@
       activeModule: "childcare",
       assignments: structuredClone(initialAssignments),
       notes: {},
-      showPast: false
+      showPast: false,
+      visibleDays: INITIAL_VISIBLE_DAYS
     };
 
     const history = {
@@ -1131,6 +1133,7 @@
     const todayButton = document.querySelector("#todayAction");
     const togglePastButton = document.querySelector("#togglePastAction");
     let activeSlot = null;
+    let autoExtendPausedUntil = 0;
 
     function toDate(dateKey) {
       return new Date(`${dateKey}T00:00:00`);
@@ -1185,7 +1188,7 @@
 
     function getWeekDates() {
       const start = visibleStartDate();
-      return Array.from({ length: VISIBLE_DAYS }, (_, index) => addDays(start, index));
+      return Array.from({ length: state.visibleDays }, (_, index) => addDays(start, index));
     }
 
     function saveState() {
@@ -1203,6 +1206,7 @@
         state.assignments = parsed.assignments || state.assignments;
         state.notes = parsed.notes || {};
         state.showPast = Boolean(parsed.showPast);
+        state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(parsed.visibleDays) || INITIAL_VISIBLE_DAYS);
         if (!state.showPast && compareDateKeys(state.weekStart, todayKey()) < 0) {
           state.weekStart = todayKey();
         }
@@ -1217,7 +1221,8 @@
         activeModule: state.activeModule,
         assignments: structuredClone(state.assignments),
         notes: structuredClone(state.notes),
-        showPast: state.showPast
+        showPast: state.showPast,
+        visibleDays: state.visibleDays
       };
     }
 
@@ -1227,6 +1232,7 @@
       state.assignments = structuredClone(nextState.assignments);
       state.notes = structuredClone(nextState.notes || {});
       state.showPast = Boolean(nextState.showPast);
+      state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(nextState.visibleDays) || INITIAL_VISIBLE_DAYS);
       closePopover();
       render();
     }
@@ -1335,6 +1341,36 @@
       togglePastButton.textContent = state.showPast ? "隱藏過去" : "顯示過去";
     }
 
+    function extendVisibleDays() {
+      state.visibleDays += EXTEND_DAYS;
+      render();
+    }
+
+    function maybeExtendVisibleDays() {
+      if (Date.now() < autoExtendPausedUntil) return;
+      if (window.matchMedia(MOBILE_QUERY).matches) {
+        const distanceToBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+        if (distanceToBottom < 420) {
+          extendVisibleDays();
+        }
+        return;
+      }
+
+      if (!boardWrap) return;
+      const distanceToRight = boardWrap.scrollWidth - (boardWrap.scrollLeft + boardWrap.clientWidth);
+      if (distanceToRight < 240) {
+        const previousLeft = boardWrap.scrollLeft;
+        extendVisibleDays();
+        requestAnimationFrame(() => {
+          boardWrap.scrollLeft = previousLeft;
+        });
+      }
+    }
+
+    function pauseAutoExtend(ms = 900) {
+      autoExtendPausedUntil = Date.now() + ms;
+    }
+
     function scrollToToday() {
       const today = todayKey();
       requestAnimationFrame(() => {
@@ -1361,7 +1397,7 @@
         renderMobileBoard();
         return;
       }
-      board.style.gridTemplateColumns = `112px repeat(${VISIBLE_DAYS}, 118px)`;
+      board.style.gridTemplateColumns = `112px repeat(${state.visibleDays}, 118px)`;
       const weekdaySlots = modules[state.activeModule].weekdaySlots;
       const corner = document.createElement("div");
       corner.className = "board-corner";
@@ -1696,25 +1732,33 @@
     undoButton.addEventListener("click", undo);
     redoButton.addEventListener("click", redo);
     document.querySelector("#prevWeek").addEventListener("click", () => {
+      pauseAutoExtend();
       const nextStart = addDays(visibleStartDate(), -7);
       state.weekStart = state.showPast || compareDateKeys(nextStart, todayKey()) >= 0 ? nextStart : todayKey();
+      state.visibleDays = INITIAL_VISIBLE_DAYS;
       render();
     });
     document.querySelector("#nextWeek").addEventListener("click", () => {
+      pauseAutoExtend();
       state.weekStart = addDays(visibleStartDate(), 7);
       state.showPast = false;
+      state.visibleDays = INITIAL_VISIBLE_DAYS;
       render();
     });
     todayButton.addEventListener("click", () => {
+      pauseAutoExtend();
       state.weekStart = todayKey();
       state.showPast = false;
+      state.visibleDays = INITIAL_VISIBLE_DAYS;
       render();
       scrollToToday();
       showToast("已回到今天");
     });
     togglePastButton.addEventListener("click", () => {
+      pauseAutoExtend();
       state.showPast = !state.showPast;
       state.weekStart = state.showPast ? earliestAssignmentKey() : todayKey();
+      state.visibleDays = INITIAL_VISIBLE_DAYS;
       render();
     });
     document.querySelector("#downloadIcs").addEventListener("click", downloadIcs);
@@ -1747,6 +1791,10 @@
     });
 
     window.matchMedia(MOBILE_QUERY).addEventListener("change", render);
+    window.addEventListener("scroll", maybeExtendVisibleDays, { passive: true });
+    if (boardWrap) {
+      boardWrap.addEventListener("scroll", maybeExtendVisibleDays, { passive: true });
+    }
 
     loadState();
     render();
