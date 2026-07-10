@@ -142,18 +142,24 @@
       cursor: grabbing;
     }
 
-    .drag-dot {
-      color: currentColor;
-      opacity: .56;
-      font-size: 18px;
-      letter-spacing: -2px;
+    .icon {
+      display: block;
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
     }
 
-    .sidebar-note {
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
+    .drag-handle {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      color: currentColor;
+      opacity: .54;
     }
 
     .module-list {
@@ -261,7 +267,8 @@
     .icon-button {
       width: 40px;
       padding: 0;
-      font-size: 18px;
+      display: grid;
+      place-items: center;
     }
 
     .text-button.primary {
@@ -291,9 +298,9 @@
 
     .week-board {
       display: grid;
-      grid-template-columns: 108px repeat(14, minmax(80px, 1fr));
+      grid-template-columns: 96px repeat(14, minmax(82px, 1fr));
       grid-template-rows: 72px repeat(3, 126px);
-      min-width: 1228px;
+      min-width: 1244px;
     }
 
     .board-corner,
@@ -347,19 +354,19 @@
     .row-label {
       display: grid;
       align-content: center;
-      gap: 6px;
-      padding: 12px;
+      gap: 4px;
+      padding: 9px 10px;
       background: rgba(255, 250, 240, .84);
     }
 
     .row-label strong {
-      font-size: 14px;
+      font-size: 12px;
       line-height: 1.25;
     }
 
     .row-label span {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .slot {
@@ -367,7 +374,7 @@
       display: grid;
       align-content: center;
       min-height: 0;
-      padding: 12px;
+      padding: 7px;
       background: rgba(255, 255, 255, .48);
       transition: border-color .16s ease, transform .16s ease, background .16s ease;
     }
@@ -388,7 +395,7 @@
     .slot.all-day .empty-state {
       width: 100%;
       height: 100%;
-      min-height: 320px;
+      min-height: 330px;
     }
 
     .slot.all-day .assignment-chip {
@@ -434,25 +441,33 @@
 
     .slot-menu-button {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 50%;
+      right: 14px;
       display: grid;
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       place-items: center;
-      color: var(--ink);
-      background: rgba(255, 250, 240, .9);
-      border: 1px solid var(--line);
+      color: currentColor;
+      background: rgba(255, 250, 240, .72);
+      border: 1px solid rgba(216, 205, 185, .72);
       border-radius: 50%;
       opacity: 0;
-      transform: translateY(-3px);
+      transform: translateY(-50%) scale(.96);
       transition: opacity .14s ease, transform .14s ease;
     }
 
     .slot:hover .slot-menu-button,
     .slot:focus-within .slot-menu-button {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(-50%) scale(1);
+    }
+
+    .slot[data-person="mo"] .slot-menu-button {
+      color: #113d39;
+    }
+
+    .slot[data-person="lisa"] .slot-menu-button {
+      color: #65311f;
     }
 
     .note-dot {
@@ -481,20 +496,31 @@
     }
 
     .empty-state {
-      display: grid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       min-height: 44px;
-      place-items: center;
+      width: 100%;
+      height: 100%;
       color: #9c917f;
-      background: var(--empty);
-      border: 1px dashed #cbbfa9;
+      background: rgba(235, 227, 212, .48);
+      border: 1px dashed rgba(203, 191, 169, .72);
       border-radius: var(--radius);
       font-size: 12px;
     }
 
+    .empty-state .icon {
+      width: 22px;
+      height: 22px;
+      opacity: .62;
+    }
+
     .assignment-chip {
       justify-content: center;
-      min-height: 56px;
-      padding: 10px;
+      width: 100%;
+      height: 100%;
+      min-height: 82px;
+      padding: 10px 42px 10px 10px;
       cursor: grab;
       font-size: 17px;
     }
@@ -765,14 +791,17 @@
       <div class="person-tray" aria-label="可拖曳成員">
         <div class="person-card" data-person="mo" draggable="true">
           <strong>Mo</strong>
-          <span class="drag-dot">•••</span>
+          <span class="drag-handle" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
+          </span>
         </div>
         <div class="person-card" data-person="lisa" draggable="true">
           <strong>Lisa</strong>
-          <span class="drag-dot">•••</span>
+          <span class="drag-handle" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
+          </span>
         </div>
       </div>
-      <p class="sidebar-note">把成員拖到日期格中即可安排。也可以點格子開選單，快速換人、清空或加入備註。</p>
 
       <div class="section-title">模組</div>
       <div class="module-list">
@@ -803,10 +832,18 @@
           </div>
         </div>
         <div class="actions">
-          <button class="icon-button" id="prevWeek" type="button" title="上一週">‹</button>
-          <button class="icon-button" id="nextWeek" type="button" title="下一週">›</button>
-          <button class="icon-button" id="undoAction" type="button" title="復原">↶</button>
-          <button class="icon-button" id="redoAction" type="button" title="重做">↷</button>
+          <button class="icon-button" id="prevWeek" type="button" title="上一週" aria-label="上一週">
+            <svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button class="icon-button" id="nextWeek" type="button" title="下一週" aria-label="下一週">
+            <svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <button class="icon-button" id="undoAction" type="button" title="復原" aria-label="復原">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+          </button>
+          <button class="icon-button" id="redoAction" type="button" title="重做" aria-label="重做">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg>
+          </button>
           <button class="text-button primary" id="saveData" type="button">儲存</button>
         </div>
       </header>
@@ -1027,6 +1064,14 @@
       }
     }
 
+    function iconSvg(name) {
+      const paths = {
+        menu: '<path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/>',
+        plus: '<path d="M12 5v14"/><path d="M5 12h14"/>'
+      };
+      return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${paths[name]}</svg>`;
+    }
+
     function getNoteKey(dateKey, slotId) {
       return `${dateKey}::${slotId}`;
     }
@@ -1078,7 +1123,7 @@
 
     function renderBoard() {
       board.innerHTML = "";
-      board.style.gridTemplateColumns = `108px repeat(${VISIBLE_DAYS}, minmax(80px, 1fr))`;
+      board.style.gridTemplateColumns = `96px repeat(${VISIBLE_DAYS}, minmax(82px, 1fr))`;
       const weekdaySlots = modules[state.activeModule].weekdaySlots;
       const corner = document.createElement("div");
       corner.className = "board-corner";
@@ -1144,7 +1189,7 @@
       const menuButton = document.createElement("button");
       menuButton.className = "slot-menu-button";
       menuButton.type = "button";
-      menuButton.textContent = "⋯";
+      menuButton.innerHTML = iconSvg("menu");
       menuButton.setAttribute("aria-label", "編輯安排");
       menuButton.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -1166,6 +1211,7 @@
 
       const personId = state.assignments[dateKey]?.[slot.id];
       if (personId) {
+        slotEl.dataset.person = personId;
         const chip = document.createElement("div");
         chip.className = "assignment-chip";
         chip.dataset.person = personId;
@@ -1178,7 +1224,7 @@
       } else {
         const empty = document.createElement("div");
         empty.className = "empty-state";
-        empty.textContent = "空";
+        empty.innerHTML = iconSvg("plus");
         slotEl.appendChild(empty);
       }
 
