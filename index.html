@@ -1,0 +1,1360 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>家庭分工工作台</title>
+  <style>
+    :root {
+      --paper: #f7f3ea;
+      --panel: #fffaf0;
+      --ink: #24211d;
+      --muted: #746b5e;
+      --line: #d8cdb9;
+      --mo: #1f6f68;
+      --mo-soft: #dff1ec;
+      --lisa: #9a4f34;
+      --lisa-soft: #f6e1d6;
+      --empty: #ebe3d4;
+      --accent: #c6a15b;
+      --shadow: 0 18px 48px rgba(63, 49, 30, .16);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Avenir Next", "Noto Sans TC", "PingFang TC", sans-serif;
+      background:
+        linear-gradient(90deg, rgba(36, 33, 29, .035) 1px, transparent 1px),
+        linear-gradient(rgba(36, 33, 29, .028) 1px, transparent 1px),
+        var(--paper);
+      background-size: 36px 36px;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      padding: 24px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(255, 250, 240, .76);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      color: #fff;
+      background: var(--ink);
+      border-radius: var(--radius);
+      font-family: Georgia, serif;
+      font-size: 22px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .brand p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .section-title {
+      margin: 24px 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .person-tray {
+      display: grid;
+      gap: 10px;
+    }
+
+    .person-card,
+    .assignment-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      user-select: none;
+    }
+
+    .person-card {
+      box-shadow: 0 8px 24px rgba(55, 43, 28, .09);
+    }
+
+    .person-card[data-person="mo"],
+    .assignment-chip[data-person="mo"] {
+      color: #113d39;
+      background: var(--mo-soft);
+      border-color: rgba(31, 111, 104, .24);
+    }
+
+    .person-card[data-person="lisa"],
+    .assignment-chip[data-person="lisa"] {
+      color: #65311f;
+      background: var(--lisa-soft);
+      border-color: rgba(154, 79, 52, .24);
+    }
+
+    .person-card:active,
+    .assignment-chip:active {
+      cursor: grabbing;
+    }
+
+    .drag-dot {
+      color: currentColor;
+      opacity: .56;
+      font-size: 18px;
+      letter-spacing: -2px;
+    }
+
+    .sidebar-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .module-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .module-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 11px 12px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .45);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      text-align: left;
+    }
+
+    .module-button.active {
+      color: #fff;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .module-button[disabled] {
+      color: #9a907f;
+      cursor: not-allowed;
+    }
+
+    .main {
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .title-block h2 {
+      margin: 0;
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: 1;
+    }
+
+    .title-block p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .time-rules {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .time-rule {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      min-height: 36px;
+      padding: 8px 11px;
+      background: rgba(255, 250, 240, .84);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 6px 18px rgba(55, 43, 28, .06);
+    }
+
+    .time-rule strong {
+      font-size: 13px;
+    }
+
+    .time-rule span {
+      color: var(--muted);
+      font-family: Georgia, serif;
+      font-size: 15px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .icon-button,
+    .text-button {
+      min-height: 38px;
+      padding: 9px 12px;
+      color: var(--ink);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 6px 18px rgba(55, 43, 28, .07);
+    }
+
+    .icon-button {
+      width: 40px;
+      padding: 0;
+      font-size: 18px;
+    }
+
+    .text-button.primary {
+      color: #fff;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .board-wrap,
+    .inspector {
+      background: rgba(255, 250, 240, .82);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .board-wrap {
+      overflow: auto;
+    }
+
+    .week-board {
+      display: grid;
+      grid-template-columns: 108px repeat(14, minmax(80px, 1fr));
+      grid-template-rows: 72px repeat(3, 126px);
+      min-width: 1228px;
+    }
+
+    .board-corner,
+    .date-cell,
+    .row-label,
+    .slot {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .board-corner {
+      display: grid;
+      align-items: end;
+      padding: 12px;
+      color: var(--muted);
+      background: rgba(255, 250, 240, .92);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .date-cell {
+      display: grid;
+      align-content: center;
+      gap: 5px;
+      padding: 10px;
+      background: rgba(255, 250, 240, .92);
+    }
+
+    .date-cell.weekend {
+      background: rgba(236, 226, 207, .68);
+    }
+
+    .date {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .date strong {
+      font-family: Georgia, serif;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .date span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .row-label {
+      display: grid;
+      align-content: center;
+      gap: 6px;
+      padding: 12px;
+      background: rgba(255, 250, 240, .84);
+    }
+
+    .row-label strong {
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .row-label span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .slot {
+      position: relative;
+      display: grid;
+      align-content: center;
+      min-height: 0;
+      padding: 12px;
+      background: rgba(255, 255, 255, .48);
+      transition: border-color .16s ease, transform .16s ease, background .16s ease;
+    }
+
+    .slot.weekend-muted {
+      background:
+        linear-gradient(135deg, rgba(116, 107, 94, .08) 25%, transparent 25%, transparent 50%, rgba(116, 107, 94, .08) 50%, rgba(116, 107, 94, .08) 75%, transparent 75%),
+        rgba(236, 226, 207, .25);
+      background-size: 12px 12px;
+    }
+
+    .slot.all-day {
+      align-content: center;
+      background: rgba(236, 226, 207, .46);
+    }
+
+    .slot.all-day .assignment-chip,
+    .slot.all-day .empty-state {
+      width: 100%;
+      height: 100%;
+      min-height: 320px;
+    }
+
+    .slot.all-day .assignment-chip {
+      display: grid;
+      place-items: center;
+      font-size: 19px;
+    }
+
+    .slot.drag-over {
+      background: #fffdf8;
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 2px rgba(198, 161, 91, .38);
+    }
+
+    .slot.has-note {
+      background-image: linear-gradient(135deg, rgba(198, 161, 91, .12), transparent 45%);
+    }
+
+    .slot-note {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: calc(100% - 6px);
+      z-index: 5;
+      max-width: 220px;
+      padding: 9px 10px;
+      color: #fff;
+      background: rgba(36, 33, 29, .96);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      line-height: 1.45;
+      opacity: 0;
+      transform: translateY(6px);
+      pointer-events: none;
+      transition: opacity .14s ease, transform .14s ease;
+    }
+
+    .slot.has-note:hover .slot-note {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slot-menu-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      color: var(--ink);
+      background: rgba(255, 250, 240, .9);
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      opacity: 0;
+      transform: translateY(-3px);
+      transition: opacity .14s ease, transform .14s ease;
+    }
+
+    .slot:hover .slot-menu-button,
+    .slot:focus-within .slot-menu-button {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .note-dot {
+      position: absolute;
+      right: 12px;
+      bottom: 10px;
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .slot-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .slot-label span:last-child {
+      font-weight: 500;
+      opacity: .72;
+    }
+
+    .empty-state {
+      display: grid;
+      min-height: 44px;
+      place-items: center;
+      color: #9c917f;
+      background: var(--empty);
+      border: 1px dashed #cbbfa9;
+      border-radius: var(--radius);
+      font-size: 12px;
+    }
+
+    .assignment-chip {
+      justify-content: center;
+      min-height: 56px;
+      padding: 10px;
+      cursor: grab;
+      font-size: 17px;
+    }
+
+    .inspector {
+      padding: 16px;
+    }
+
+    .inspector h3 {
+      margin: 0 0 12px;
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: 22px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      padding: 12px;
+      background: rgba(255, 255, 255, .52);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 8px;
+      max-height: 360px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(216, 205, 185, .7);
+      font-size: 13px;
+    }
+
+    .timeline-item time {
+      color: var(--muted);
+    }
+
+    .calendar-box {
+      margin-top: 16px;
+      padding: 14px;
+      background: #24211d;
+      color: #fff;
+      border-radius: var(--radius);
+    }
+
+    .calendar-box p {
+      margin: 8px 0 12px;
+      color: rgba(255, 255, 255, .72);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .calendar-box button {
+      width: 100%;
+      min-height: 38px;
+      color: var(--ink);
+      background: #f2d28b;
+      border-radius: var(--radius);
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      padding: 12px 14px;
+      color: #fff;
+      background: rgba(36, 33, 29, .94);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slot-popover {
+      position: fixed;
+      z-index: 20;
+      display: none;
+      width: min(320px, calc(100vw - 28px));
+      padding: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .slot-popover.open {
+      display: block;
+    }
+
+    .popover-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .popover-head strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .popover-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .popover-close {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      background: rgba(36, 33, 29, .08);
+      border-radius: 50%;
+    }
+
+    .person-menu {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .person-choice,
+    .clear-choice,
+    .note-save {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .52);
+    }
+
+    .person-choice[data-person="mo"] {
+      color: #113d39;
+      background: var(--mo-soft);
+      border-color: rgba(31, 111, 104, .24);
+    }
+
+    .person-choice[data-person="lisa"] {
+      color: #65311f;
+      background: var(--lisa-soft);
+      border-color: rgba(154, 79, 52, .24);
+    }
+
+    .clear-choice {
+      grid-column: 1 / -1;
+    }
+
+    .note-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .note-field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .note-field textarea {
+      width: 100%;
+      min-height: 86px;
+      resize: vertical;
+      padding: 10px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .62);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .note-save {
+      color: #fff;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .icon-button:disabled {
+      opacity: .42;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 1080px) {
+      .app-shell,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .person-tray,
+      .module-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .main,
+      .sidebar {
+        padding: 16px;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .person-tray,
+      .module-list,
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .slot-menu-button {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+          <h1>家庭分工</h1>
+          <p>照顧、家務與未來模組的協作工作台</p>
+        </div>
+      </div>
+
+      <div class="section-title">成員</div>
+      <div class="person-tray" aria-label="可拖曳成員">
+        <div class="person-card" data-person="mo" draggable="true">
+          <strong>Mo</strong>
+          <span class="drag-dot">•••</span>
+        </div>
+        <div class="person-card" data-person="lisa" draggable="true">
+          <strong>Lisa</strong>
+          <span class="drag-dot">•••</span>
+        </div>
+      </div>
+      <p class="sidebar-note">把成員拖到日期格中即可安排。也可以點格子開選單，快速換人、清空或加入備註。</p>
+
+      <div class="section-title">模組</div>
+      <div class="module-list">
+        <button class="module-button active" type="button">
+          <span>小孩照顧</span>
+          <span>現在</span>
+        </button>
+        <button class="module-button" type="button" disabled>
+          <span>資產分配</span>
+          <span>預留</span>
+        </button>
+        <button class="module-button" type="button" disabled>
+          <span>家務任務</span>
+          <span>預留</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title-block">
+          <h2>七月照顧分工</h2>
+          <div class="time-rules" aria-label="固定時段">
+            <div class="time-rule"><strong>早上送託</strong><span>7:30</span></div>
+            <div class="time-rule"><strong>放學接回</strong><span>15:30</span></div>
+            <div class="time-rule"><strong>晚間照顧</strong><span>晚間</span></div>
+            <div class="time-rule"><strong>週末</strong><span>整日</span></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="icon-button" id="prevWeek" type="button" title="上一週">‹</button>
+          <button class="icon-button" id="nextWeek" type="button" title="下一週">›</button>
+          <button class="icon-button" id="undoAction" type="button" title="復原">↶</button>
+          <button class="icon-button" id="redoAction" type="button" title="重做">↷</button>
+          <button class="text-button primary" id="saveData" type="button">儲存</button>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <section class="board-wrap" aria-label="分工月曆">
+          <div class="week-board" id="weekBoard"></div>
+        </section>
+
+        <aside class="inspector">
+          <h3>顯示範圍摘要</h3>
+          <div class="stat-grid" id="stats"></div>
+          <div class="timeline" id="timeline"></div>
+          <div class="calendar-box">
+            <strong>Google Calendar</strong>
+            <p>目前先提供 .ics 匯出，可匯入共享日曆。之後接 Google OAuth 後，可改成直接同步到指定日曆。</p>
+            <button id="downloadIcs" type="button">下載日曆檔</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="slot-popover" id="slotPopover" role="dialog" aria-modal="false" aria-label="編輯安排">
+    <div class="popover-head">
+      <div>
+        <strong id="popoverTitle">編輯安排</strong>
+        <span id="popoverSubtitle"></span>
+      </div>
+      <button class="popover-close" id="closePopover" type="button" aria-label="關閉">×</button>
+    </div>
+    <div class="person-menu" id="personMenu"></div>
+    <div class="note-field">
+      <label for="noteInput">備註</label>
+      <textarea id="noteInput" placeholder="例如：今天要帶水壺、延後接回、請提醒老師..."></textarea>
+      <button class="note-save" id="saveNote" type="button">儲存備註</button>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "family-ops-care-module-v2";
+    const VISIBLE_DAYS = 14;
+
+    const people = {
+      mo: { id: "mo", label: "Mo" },
+      lisa: { id: "lisa", label: "Lisa" }
+    };
+
+    const modules = {
+      childcare: {
+        id: "childcare",
+        label: "小孩照顧",
+        weekdaySlots: [
+          { id: "morning_dropoff", label: "早上送託", calendarTime: ["07:30", "08:00"] },
+          { id: "school_pickup", label: "放學接回", calendarTime: ["15:30", "16:00"] },
+          { id: "evening_care", label: "晚間照顧", calendarTime: ["19:00", "21:30"] }
+        ],
+        weekendSlots: [
+          { id: "all_day_care", label: "整日照顧", allDay: true }
+        ]
+      }
+    };
+
+    const initialAssignments = {
+      "2026-07-09": { morning_dropoff: "mo", school_pickup: "mo", evening_care: "lisa" },
+      "2026-07-10": { morning_dropoff: "mo", school_pickup: "mo", evening_care: "mo" },
+      "2026-07-11": { all_day_care: "mo" },
+      "2026-07-12": { all_day_care: "lisa" },
+      "2026-07-13": { morning_dropoff: "mo", school_pickup: "mo", evening_care: "mo" },
+      "2026-07-14": { morning_dropoff: "mo", school_pickup: "mo", evening_care: "lisa" },
+      "2026-07-15": { morning_dropoff: "mo", school_pickup: "mo", evening_care: "mo" },
+      "2026-07-16": { morning_dropoff: "mo", school_pickup: "mo", evening_care: "lisa" },
+      "2026-07-17": { morning_dropoff: "mo", school_pickup: "mo", evening_care: "mo" },
+      "2026-07-18": { all_day_care: "lisa" },
+      "2026-07-19": { all_day_care: "mo" }
+    };
+
+    const state = {
+      weekStart: "2026-07-09",
+      activeModule: "childcare",
+      assignments: structuredClone(initialAssignments),
+      notes: {}
+    };
+
+    const history = {
+      undo: [],
+      redo: []
+    };
+
+    const weekdayLabels = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+    const board = document.querySelector("#weekBoard");
+    const stats = document.querySelector("#stats");
+    const timeline = document.querySelector("#timeline");
+    const toast = document.querySelector("#toast");
+    const popover = document.querySelector("#slotPopover");
+    const popoverTitle = document.querySelector("#popoverTitle");
+    const popoverSubtitle = document.querySelector("#popoverSubtitle");
+    const personMenu = document.querySelector("#personMenu");
+    const noteInput = document.querySelector("#noteInput");
+    const undoButton = document.querySelector("#undoAction");
+    const redoButton = document.querySelector("#redoAction");
+    let activeSlot = null;
+
+    function toDate(dateKey) {
+      return new Date(`${dateKey}T00:00:00`);
+    }
+
+    function toKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function addDays(dateKey, amount) {
+      const next = toDate(dateKey);
+      next.setDate(next.getDate() + amount);
+      return toKey(next);
+    }
+
+    function formatDate(dateKey) {
+      const date = toDate(dateKey);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    function getSlots(dateKey) {
+      const day = toDate(dateKey).getDay();
+      return day === 0 || day === 6
+        ? modules[state.activeModule].weekendSlots
+        : modules[state.activeModule].weekdaySlots;
+    }
+
+    function getWeekDates() {
+      return Array.from({ length: VISIBLE_DAYS }, (_, index) => addDays(state.weekStart, index));
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      showToast("已儲存");
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      try {
+        const parsed = JSON.parse(saved);
+        state.weekStart = parsed.weekStart || state.weekStart;
+        state.activeModule = parsed.activeModule || state.activeModule;
+        state.assignments = parsed.assignments || state.assignments;
+        state.notes = parsed.notes || {};
+      } catch {
+        showToast("讀取儲存資料失敗，已使用初始版本");
+      }
+    }
+
+    function snapshot() {
+      return {
+        weekStart: state.weekStart,
+        activeModule: state.activeModule,
+        assignments: structuredClone(state.assignments),
+        notes: structuredClone(state.notes)
+      };
+    }
+
+    function restoreSnapshot(nextState) {
+      state.weekStart = nextState.weekStart;
+      state.activeModule = nextState.activeModule;
+      state.assignments = structuredClone(nextState.assignments);
+      state.notes = structuredClone(nextState.notes || {});
+      closePopover();
+      render();
+    }
+
+    function commitHistory() {
+      history.undo.push(snapshot());
+      if (history.undo.length > 80) history.undo.shift();
+      history.redo = [];
+      updateHistoryButtons();
+    }
+
+    function undo() {
+      if (!history.undo.length) return;
+      history.redo.push(snapshot());
+      restoreSnapshot(history.undo.pop());
+      showToast("已復原");
+    }
+
+    function redo() {
+      if (!history.redo.length) return;
+      history.undo.push(snapshot());
+      restoreSnapshot(history.redo.pop());
+      showToast("已重做");
+    }
+
+    function updateHistoryButtons() {
+      undoButton.disabled = history.undo.length === 0;
+      redoButton.disabled = history.redo.length === 0;
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function setDragPayload(event, payload) {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("application/json", JSON.stringify(payload));
+    }
+
+    function readDragPayload(event) {
+      try {
+        return JSON.parse(event.dataTransfer.getData("application/json"));
+      } catch {
+        return null;
+      }
+    }
+
+    function getNoteKey(dateKey, slotId) {
+      return `${dateKey}::${slotId}`;
+    }
+
+    function getSlotNote(dateKey, slotId) {
+      return state.notes[getNoteKey(dateKey, slotId)] || "";
+    }
+
+    function assignPerson(dateKey, slotId, personId, source) {
+      commitHistory();
+      state.assignments[dateKey] = state.assignments[dateKey] || {};
+      state.assignments[dateKey][slotId] = personId;
+
+      if (source && source.dateKey && source.slotId) {
+        const sameSlot = source.dateKey === dateKey && source.slotId === slotId;
+        if (!sameSlot && state.assignments[source.dateKey]) {
+          delete state.assignments[source.dateKey][source.slotId];
+        }
+      }
+
+      render();
+    }
+
+    function removeAssignment(dateKey, slotId) {
+      if (!state.assignments[dateKey]) return;
+      commitHistory();
+      delete state.assignments[dateKey][slotId];
+      render();
+    }
+
+    function saveNote(dateKey, slotId, note) {
+      commitHistory();
+      const key = getNoteKey(dateKey, slotId);
+      const trimmed = note.trim();
+      if (trimmed) {
+        state.notes[key] = trimmed;
+      } else {
+        delete state.notes[key];
+      }
+      render();
+      showToast(trimmed ? "已儲存備註" : "已清除備註");
+    }
+
+    function render() {
+      renderBoard();
+      renderSummary();
+      updateHistoryButtons();
+    }
+
+    function renderBoard() {
+      board.innerHTML = "";
+      board.style.gridTemplateColumns = `108px repeat(${VISIBLE_DAYS}, minmax(80px, 1fr))`;
+      const weekdaySlots = modules[state.activeModule].weekdaySlots;
+      const corner = document.createElement("div");
+      corner.className = "board-corner";
+      corner.textContent = "類別";
+      board.appendChild(corner);
+
+      getWeekDates().forEach((dateKey, index) => {
+        const date = toDate(dateKey);
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+        const header = document.createElement("header");
+        header.className = `date-cell${isWeekend ? " weekend" : ""}`;
+        header.style.gridColumn = String(index + 2);
+        header.style.gridRow = "1";
+        header.innerHTML = `
+          <div class="date">
+            <strong>${formatDate(dateKey)}</strong>
+            <span>${weekdayLabels[date.getDay()]}</span>
+          </div>
+        `;
+        board.appendChild(header);
+      });
+
+      weekdaySlots.forEach((slot, index) => {
+        const label = document.createElement("div");
+        label.className = "row-label";
+        label.style.gridColumn = "1";
+        label.style.gridRow = String(index + 2);
+        label.innerHTML = `<strong>${slot.label}</strong><span>${slot.calendarTime[0]}</span>`;
+        board.appendChild(label);
+      });
+
+      getWeekDates().forEach((dateKey, dayIndex) => {
+        const date = toDate(dateKey);
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+        const column = String(dayIndex + 2);
+
+        if (isWeekend) {
+          const slot = modules[state.activeModule].weekendSlots[0];
+          const slotEl = renderSlot(dateKey, slot);
+          slotEl.style.gridColumn = column;
+          slotEl.style.gridRow = "2 / 5";
+          board.appendChild(slotEl);
+          return;
+        }
+
+        weekdaySlots.forEach((slot, slotIndex) => {
+          const slotEl = renderSlot(dateKey, slot);
+          slotEl.style.gridColumn = column;
+          slotEl.style.gridRow = String(slotIndex + 2);
+          board.appendChild(slotEl);
+        });
+      });
+    }
+
+    function renderSlot(dateKey, slot) {
+      const note = getSlotNote(dateKey, slot.id);
+      const slotEl = document.createElement("div");
+      slotEl.className = `slot${slot.allDay ? " all-day" : ""}${note ? " has-note" : ""}`;
+      slotEl.dataset.date = dateKey;
+      slotEl.dataset.slot = slot.id;
+      slotEl.setAttribute("aria-label", `${formatDate(dateKey)} ${slot.label}`);
+
+      const menuButton = document.createElement("button");
+      menuButton.className = "slot-menu-button";
+      menuButton.type = "button";
+      menuButton.textContent = "⋯";
+      menuButton.setAttribute("aria-label", "編輯安排");
+      menuButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        openSlotMenu(slotEl, dateKey, slot);
+      });
+      slotEl.appendChild(menuButton);
+
+      if (note) {
+        const noteEl = document.createElement("div");
+        noteEl.className = "slot-note";
+        noteEl.textContent = note;
+        slotEl.appendChild(noteEl);
+
+        const noteDot = document.createElement("span");
+        noteDot.className = "note-dot";
+        noteDot.setAttribute("aria-hidden", "true");
+        slotEl.appendChild(noteDot);
+      }
+
+      const personId = state.assignments[dateKey]?.[slot.id];
+      if (personId) {
+        const chip = document.createElement("div");
+        chip.className = "assignment-chip";
+        chip.dataset.person = personId;
+        chip.draggable = true;
+        chip.innerHTML = `<strong>${people[personId].label}</strong>`;
+        chip.addEventListener("dragstart", (event) => {
+          setDragPayload(event, { personId, source: { dateKey, slotId: slot.id } });
+        });
+        slotEl.appendChild(chip);
+      } else {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "空";
+        slotEl.appendChild(empty);
+      }
+
+      slotEl.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        slotEl.classList.add("drag-over");
+      });
+      slotEl.addEventListener("dragleave", () => slotEl.classList.remove("drag-over"));
+      slotEl.addEventListener("drop", (event) => {
+        event.preventDefault();
+        slotEl.classList.remove("drag-over");
+        const payload = readDragPayload(event);
+        if (!payload?.personId) return;
+        assignPerson(dateKey, slot.id, payload.personId, payload.source);
+      });
+      slotEl.addEventListener("click", (event) => {
+        if (event.target.closest(".slot-menu-button")) return;
+        openSlotMenu(slotEl, dateKey, slot);
+      });
+
+      return slotEl;
+    }
+
+    function openSlotMenu(slotEl, dateKey, slot) {
+      activeSlot = { dateKey, slotId: slot.id };
+      popoverTitle.textContent = `${formatDate(dateKey)} ${slot.label}`;
+      popoverSubtitle.textContent = slot.allDay ? "整日安排" : slot.calendarTime[0];
+      noteInput.value = getSlotNote(dateKey, slot.id);
+      personMenu.innerHTML = Object.values(people).map((person) => `
+        <button class="person-choice" data-person="${person.id}" type="button">${person.label}</button>
+      `).join("") + `<button class="clear-choice" type="button">清空安排</button>`;
+
+      personMenu.querySelectorAll(".person-choice").forEach((button) => {
+        button.addEventListener("click", () => {
+          assignPerson(dateKey, slot.id, button.dataset.person);
+          closePopover();
+        });
+      });
+      personMenu.querySelector(".clear-choice").addEventListener("click", () => {
+        removeAssignment(dateKey, slot.id);
+        closePopover();
+      });
+
+      const rect = slotEl.getBoundingClientRect();
+      const left = Math.min(Math.max(14, rect.left), window.innerWidth - 334);
+      const top = Math.min(rect.bottom + 8, window.innerHeight - 300);
+      popover.style.left = `${left}px`;
+      popover.style.top = `${Math.max(14, top)}px`;
+      popover.classList.add("open");
+    }
+
+    function closePopover() {
+      popover.classList.remove("open");
+      activeSlot = null;
+    }
+
+    function renderSummary() {
+      const counts = { mo: 0, lisa: 0 };
+      const items = [];
+      getWeekDates().forEach((dateKey) => {
+        getSlots(dateKey).forEach((slot) => {
+          const personId = state.assignments[dateKey]?.[slot.id];
+          if (!personId) return;
+          counts[personId] += slot.allDay ? 3 : 1;
+          items.push({ dateKey, slot, personId });
+        });
+      });
+
+      stats.innerHTML = Object.values(people).map((person) => `
+        <div class="stat">
+          <strong>${counts[person.id]}</strong>
+          <span>${person.label} 責任點數</span>
+        </div>
+      `).join("");
+
+      timeline.innerHTML = items.length
+        ? items.map((item) => `
+          <div class="timeline-item">
+            <time>${formatDate(item.dateKey)}</time>
+            <div>${item.slot.label}：<strong>${people[item.personId].label}</strong></div>
+          </div>
+        `).join("")
+        : `<div class="empty-state">本週尚未安排</div>`;
+    }
+
+    function buildIcs() {
+      const lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Family Ops//Care Planner//ZH"
+      ];
+
+      Object.entries(state.assignments).forEach(([dateKey, slots]) => {
+        getSlots(dateKey).forEach((slot) => {
+          const personId = slots[slot.id];
+          if (!personId) return;
+          const compactDate = dateKey.replaceAll("-", "");
+          const uid = `${dateKey}-${slot.id}-${personId}@family-ops`;
+          lines.push("BEGIN:VEVENT");
+          lines.push(`UID:${uid}`);
+          lines.push(`SUMMARY:${slot.label} - ${people[personId].label}`);
+          const note = getSlotNote(dateKey, slot.id);
+          if (note) lines.push(`DESCRIPTION:${note.replaceAll("\n", "\\n")}`);
+          if (slot.allDay) {
+            lines.push(`DTSTART;VALUE=DATE:${compactDate}`);
+            lines.push(`DTEND;VALUE=DATE:${addDays(dateKey, 1).replaceAll("-", "")}`);
+          } else {
+            const [startTime, endTime] = slot.calendarTime;
+            lines.push(`DTSTART:${compactDate}T${startTime.replace(":", "")}00`);
+            lines.push(`DTEND:${compactDate}T${endTime.replace(":", "")}00`);
+          }
+          lines.push("END:VEVENT");
+        });
+      });
+
+      lines.push("END:VCALENDAR");
+      return lines.join("\r\n");
+    }
+
+    function downloadIcs() {
+      const blob = new Blob([buildIcs()], { type: "text/calendar;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "family-care-schedule.ics";
+      link.click();
+      URL.revokeObjectURL(link.href);
+      showToast("已產生日曆檔");
+    }
+
+    document.querySelectorAll(".person-card").forEach((card) => {
+      card.addEventListener("dragstart", (event) => {
+        setDragPayload(event, { personId: card.dataset.person });
+      });
+    });
+
+    document.querySelector("#saveData").addEventListener("click", saveState);
+    undoButton.addEventListener("click", undo);
+    redoButton.addEventListener("click", redo);
+    document.querySelector("#prevWeek").addEventListener("click", () => {
+      state.weekStart = addDays(state.weekStart, -7);
+      render();
+    });
+    document.querySelector("#nextWeek").addEventListener("click", () => {
+      state.weekStart = addDays(state.weekStart, 7);
+      render();
+    });
+    document.querySelector("#downloadIcs").addEventListener("click", downloadIcs);
+    document.querySelector("#closePopover").addEventListener("click", closePopover);
+    document.querySelector("#saveNote").addEventListener("click", () => {
+      if (!activeSlot) return;
+      saveNote(activeSlot.dateKey, activeSlot.slotId, noteInput.value);
+      closePopover();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!popover.classList.contains("open")) return;
+      if (event.target.closest("#slotPopover") || event.target.closest(".slot")) return;
+      closePopover();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const modifier = event.metaKey || event.ctrlKey;
+      if (!modifier) return;
+      const key = event.key.toLowerCase();
+      if (key === "z" && !event.shiftKey) {
+        event.preventDefault();
+        undo();
+      }
+      if ((key === "z" && event.shiftKey) || key === "y") {
+        event.preventDefault();
+        redo();
+      }
+    });
+
+    loadState();
+    render();
+  </script>
+</body>
+</html>
