@@ -226,8 +226,9 @@
     }
 
     .time-rule {
-      display: inline-flex;
-      align-items: baseline;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: start;
       gap: 8px;
       min-height: 36px;
       padding: 8px 11px;
@@ -241,12 +242,21 @@
 
     .time-rule strong {
       font-size: 13px;
+      line-height: 1.3;
     }
 
     .time-rule span {
       color: var(--muted);
       font-size: 13px;
       line-height: 1.25;
+    }
+
+    .time-rule small {
+      display: block;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.35;
     }
 
     .time-rule svg {
@@ -1095,10 +1105,20 @@
     };
 
     const defaultTimeRules = {
-      morning_dropoff: "預設 7:30，可依孩子調整",
-      school_pickup: "預設 15:30，可依星期調整",
-      evening_care: "依當日晚間安排",
-      all_day_care: "週末整日"
+      morning_dropoff: [
+        { start: "2026-07-10", end: "2026-07-20", text: "真真 7:30 / 樂樂 8:00" },
+        { start: "2026-07-21", end: "", text: "待確認" }
+      ],
+      school_pickup: [
+        { start: "2026-07-10", end: "2026-07-20", text: "真真 15:30；樂樂依星期調整" },
+        { start: "2026-07-21", end: "", text: "待確認" }
+      ],
+      evening_care: [
+        { start: "2026-07-10", end: "", text: "依當日晚間安排" }
+      ],
+      all_day_care: [
+        { start: "2026-07-10", end: "", text: "週末整日" }
+      ]
     };
 
     const state = {
@@ -1165,6 +1185,51 @@
       return a.localeCompare(b);
     }
 
+    function normalizeTimeRuleSet(value, slotId) {
+      if (Array.isArray(value)) {
+        return value
+          .map((rule) => ({
+            start: rule.start || todayKey(),
+            end: rule.end || "",
+            text: String(rule.text || "").trim()
+          }))
+          .filter((rule) => rule.text);
+      }
+      if (typeof value === "string" && value.trim()) {
+        return [{ start: todayKey(), end: "", text: value.trim() }];
+      }
+      return structuredClone(defaultTimeRules[slotId] || []);
+    }
+
+    function normalizeTimeRules(value = {}) {
+      const normalized = {};
+      Object.keys(defaultTimeRules).forEach((slotId) => {
+        normalized[slotId] = normalizeTimeRuleSet(value[slotId], slotId);
+      });
+      return normalized;
+    }
+
+    function formatRuleDate(dateKey) {
+      if (!dateKey) return "";
+      const date = toDate(dateKey);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    function formatRuleRange(rule) {
+      if (!rule.start && !rule.end) return "全期間";
+      if (rule.start && !rule.end) return `${formatRuleDate(rule.start)} 起`;
+      return `${formatRuleDate(rule.start)}-${formatRuleDate(rule.end)}`;
+    }
+
+    function getTimeRuleForDate(slotId, dateKey) {
+      const rules = normalizeTimeRuleSet(state.timeRules[slotId], slotId);
+      return rules.find((rule) => {
+        const afterStart = !rule.start || compareDateKeys(dateKey, rule.start) >= 0;
+        const beforeEnd = !rule.end || compareDateKeys(dateKey, rule.end) <= 0;
+        return afterStart && beforeEnd;
+      }) || rules[0] || null;
+    }
+
     function earliestAssignmentKey() {
       const keys = Object.keys(state.assignments).sort();
       return keys[0] || todayKey();
@@ -1205,7 +1270,7 @@
         state.activeModule = parsed.activeModule || state.activeModule;
         state.assignments = parsed.assignments || state.assignments;
         state.notes = parsed.notes || {};
-        state.timeRules = { ...defaultTimeRules, ...(parsed.timeRules || {}) };
+        state.timeRules = normalizeTimeRules(parsed.timeRules || {});
         state.showPast = Boolean(parsed.showPast);
         state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(parsed.visibleDays) || INITIAL_VISIBLE_DAYS);
         if (!state.showPast && compareDateKeys(state.weekStart, todayKey()) < 0) {
@@ -1233,7 +1298,7 @@
       state.activeModule = nextState.activeModule;
       state.assignments = structuredClone(nextState.assignments);
       state.notes = structuredClone(nextState.notes || {});
-      state.timeRules = { ...defaultTimeRules, ...(nextState.timeRules || {}) };
+      state.timeRules = normalizeTimeRules(nextState.timeRules || {});
       state.showPast = Boolean(nextState.showPast);
       state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(nextState.visibleDays) || INITIAL_VISIBLE_DAYS);
       closePopover();
@@ -1294,6 +1359,15 @@
       return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${paths[name]}</svg>`;
     }
 
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
     function getNoteKey(dateKey, slotId) {
       return `${dateKey}::${slotId}`;
     }
@@ -1345,12 +1419,16 @@
     function renderTimeRules() {
       timeRules.innerHTML = "";
       allDisplaySlots().forEach((slot) => {
+        const rules = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id);
+        const summary = rules.map((rule) => `
+          <small>${escapeHtml(formatRuleRange(rule))}</small>${escapeHtml(rule.text)}
+        `).join("<br>");
         const button = document.createElement("button");
         button.className = "time-rule";
         button.type = "button";
         button.innerHTML = `
           <strong>${slot.label}</strong>
-          <span>${state.timeRules[slot.id] || "尚未設定"}</span>
+          <span>${summary || "尚未設定"}</span>
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
         `;
         button.addEventListener("click", () => editTimeRule(slot));
@@ -1359,14 +1437,24 @@
     }
 
     function editTimeRule(slot) {
-      const current = state.timeRules[slot.id] || "";
+      const current = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id)
+        .map((rule) => `${rule.start || ""}~${rule.end || ""}｜${rule.text}`)
+        .join("\n");
       const next = prompt(
-        `編輯「${slot.label}」時間規則\n例如：真真 7:30 / 樂樂 8:00；或 樂樂週一 14:00、週二 15:00、週三 18:00 / 真真 15:30`,
+        `編輯「${slot.label}」時間規則\n每行一段期間，格式：開始日期~結束日期｜內容\n例：2026-07-10~2026-07-20｜真真 7:30 / 樂樂 8:00\n例：2026-07-21~｜樂樂週一 14:00、週二 15:00、週三 18:00 / 真真 15:30`,
         current
       );
       if (next === null) return;
+      const parsedRules = next.split("\n").map((line) => {
+        if (!line.includes("｜")) {
+          return { start: todayKey(), end: "", text: line.trim() };
+        }
+        const [range = "", ...textParts] = line.split("｜");
+        const [start = "", end = ""] = range.split("~").map((part) => part.trim());
+        return { start, end, text: textParts.join("｜").trim() };
+      }).filter((rule) => rule.text);
       commitHistory();
-      state.timeRules[slot.id] = next.trim() || defaultTimeRules[slot.id] || "";
+      state.timeRules[slot.id] = parsedRules.length ? parsedRules : structuredClone(defaultTimeRules[slot.id] || []);
       render();
       showToast("已更新時間規則");
     }
@@ -1595,7 +1683,8 @@
     function openSlotMenu(slotEl, dateKey, slot) {
       activeSlot = { dateKey, slotId: slot.id };
       popoverTitle.textContent = `${formatDate(dateKey)} ${slot.label}`;
-      popoverSubtitle.textContent = state.timeRules[slot.id] || (slot.allDay ? "整日安排" : slot.calendarTime[0]);
+      const timeRule = getTimeRuleForDate(slot.id, dateKey);
+      popoverSubtitle.textContent = timeRule ? `${formatRuleRange(timeRule)}：${timeRule.text}` : (slot.allDay ? "整日安排" : slot.calendarTime[0]);
       noteInput.value = getSlotNote(dateKey, slot.id);
       personMenu.innerHTML = Object.values(people).map((person) => `
         <button class="person-choice" data-person="${person.id}" type="button">${person.label}</button>
@@ -1671,7 +1760,9 @@
           lines.push(`UID:${uid}`);
           lines.push(`SUMMARY:${slot.label} - ${people[personId].label}`);
           const note = getSlotNote(dateKey, slot.id);
-          if (note) lines.push(`DESCRIPTION:${note.replaceAll("\n", "\\n")}`);
+          const timeRule = getTimeRuleForDate(slot.id, dateKey);
+          const description = [timeRule ? `時間規則：${timeRule.text}` : "", note].filter(Boolean).join("\\n");
+          if (description) lines.push(`DESCRIPTION:${description.replaceAll("\n", "\\n")}`);
           if (slot.allDay) {
             lines.push(`DTSTART;VALUE=DATE:${compactDate}`);
             lines.push(`DTEND;VALUE=DATE:${addDays(dateKey, 1).replaceAll("-", "")}`);
@@ -1705,6 +1796,7 @@
           const personId = slots[slot.id];
           if (!personId) return;
           const note = getSlotNote(dateKey, slot.id);
+          const timeRule = getTimeRuleForDate(slot.id, dateKey);
           const event = {
             date: dateKey,
             slotId: slot.id,
@@ -1713,6 +1805,7 @@
             personLabel: people[personId].label,
             summary: `${slot.label} - ${people[personId].label}`,
             note,
+            timeRule: timeRule ? timeRule.text : "",
             allDay: Boolean(slot.allDay)
           };
           if (!slot.allDay) {
