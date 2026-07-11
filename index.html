@@ -878,12 +878,14 @@
       .week-board.mobile-board {
         display: grid;
         grid-template-columns: 1fr;
+        grid-template-rows: none;
+        grid-auto-rows: auto;
         gap: 10px;
         min-width: 0;
       }
 
       .mobile-day {
-        overflow: hidden;
+        overflow: visible;
         background: rgba(255, 250, 240, .9);
         border: 1px solid var(--line);
         border-radius: var(--radius);
@@ -897,6 +899,7 @@
         gap: 10px;
         padding: 10px 12px;
         border-bottom: 1px solid var(--line);
+        border-radius: var(--radius) var(--radius) 0 0;
         background: rgba(255, 250, 240, .96);
       }
 
