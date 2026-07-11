@@ -219,19 +219,16 @@
     }
 
     .time-rules {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 10px;
       margin-top: 14px;
     }
 
-    .time-rule {
+    .time-rule-card {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      align-items: start;
-      gap: 8px;
-      min-height: 36px;
-      padding: 8px 11px;
+      gap: 9px;
+      padding: 11px 12px;
       color: var(--ink);
       background: rgba(255, 250, 240, .84);
       border: 1px solid var(--line);
@@ -240,29 +237,48 @@
       text-align: left;
     }
 
-    .time-rule strong {
-      font-size: 13px;
-      line-height: 1.3;
+    .time-rule-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
 
-    .time-rule span {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.25;
-    }
-
-    .time-rule small {
-      display: block;
+    .time-rule-head strong {
       color: var(--accent);
-      font-size: 11px;
-      font-weight: 800;
-      line-height: 1.35;
+      font-family: Georgia, serif;
+      font-size: 16px;
+      line-height: 1;
     }
 
-    .time-rule svg {
+    .time-rule-head svg {
       width: 14px;
       height: 14px;
-      opacity: .54;
+      opacity: .52;
+    }
+
+    .time-rule-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .time-rule-row {
+      display: grid;
+      grid-template-columns: 68px minmax(0, 1fr);
+      gap: 9px;
+      align-items: baseline;
+    }
+
+    .time-rule-row strong {
+      font-size: 12px;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+
+    .time-rule-row span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
     }
 
     .actions {
@@ -803,13 +819,17 @@
       }
 
       .time-rules {
-        gap: 6px;
+        grid-template-columns: 1fr;
+        gap: 8px;
         margin-top: 10px;
       }
 
-      .time-rule {
-        min-height: 31px;
-        padding: 6px 8px;
+      .time-rule-card {
+        padding: 10px;
+      }
+
+      .time-rule-row {
+        grid-template-columns: 64px minmax(0, 1fr);
       }
 
       .person-tray,
@@ -1110,14 +1130,16 @@
         { start: "2026-07-21", end: "", text: "待確認" }
       ],
       school_pickup: [
-        { start: "2026-07-10", end: "2026-07-20", text: "真真 15:30；樂樂依星期調整" },
+        { start: "2026-07-10", end: "2026-07-20", text: "真真 15:30；樂樂 週一 14:00 / 週二 15:00 / 週三 18:00 / 週四 15:00 / 週五 15:00" },
         { start: "2026-07-21", end: "", text: "待確認" }
       ],
       evening_care: [
-        { start: "2026-07-10", end: "", text: "依當日晚間安排" }
+        { start: "2026-07-10", end: "2026-07-20", text: "19:00 後" },
+        { start: "2026-07-21", end: "", text: "待確認" }
       ],
       all_day_care: [
-        { start: "2026-07-10", end: "", text: "週末整日" }
+        { start: "2026-07-10", end: "2026-07-20", text: "週末整日" },
+        { start: "2026-07-21", end: "", text: "待確認" }
       ]
     };
 
@@ -1185,18 +1207,24 @@
       return a.localeCompare(b);
     }
 
+    function upgradeKnownRuleText(text) {
+      return text === "真真 15:30；樂樂依星期調整"
+        ? "真真 15:30；樂樂 週一 14:00 / 週二 15:00 / 週三 18:00 / 週四 15:00 / 週五 15:00"
+        : text;
+    }
+
     function normalizeTimeRuleSet(value, slotId) {
       if (Array.isArray(value)) {
         return value
           .map((rule) => ({
             start: rule.start || todayKey(),
             end: rule.end || "",
-            text: String(rule.text || "").trim()
+            text: upgradeKnownRuleText(String(rule.text || "").trim())
           }))
           .filter((rule) => rule.text);
       }
       if (typeof value === "string" && value.trim()) {
-        return [{ start: todayKey(), end: "", text: value.trim() }];
+        return [{ start: todayKey(), end: "", text: upgradeKnownRuleText(value.trim()) }];
       }
       return structuredClone(defaultTimeRules[slotId] || []);
     }
@@ -1228,6 +1256,20 @@
         const beforeEnd = !rule.end || compareDateKeys(dateKey, rule.end) <= 0;
         return afterStart && beforeEnd;
       }) || rules[0] || null;
+    }
+
+    function getTimeRuleGroups() {
+      const groups = new Map();
+      allDisplaySlots().forEach((slot) => {
+        normalizeTimeRuleSet(state.timeRules[slot.id], slot.id).forEach((rule) => {
+          const key = `${rule.start || ""}|${rule.end || ""}`;
+          if (!groups.has(key)) {
+            groups.set(key, { start: rule.start || "", end: rule.end || "", rules: {} });
+          }
+          groups.get(key).rules[slot.id] = rule.text;
+        });
+      });
+      return [...groups.values()].sort((a, b) => compareDateKeys(a.start || "0000-00-00", b.start || "0000-00-00"));
     }
 
     function earliestAssignmentKey() {
@@ -1418,45 +1460,67 @@
 
     function renderTimeRules() {
       timeRules.innerHTML = "";
-      allDisplaySlots().forEach((slot) => {
-        const rules = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id);
-        const summary = rules.map((rule) => `
-          <small>${escapeHtml(formatRuleRange(rule))}</small>${escapeHtml(rule.text)}
-        `).join("<br>");
+      getTimeRuleGroups().forEach((group) => {
         const button = document.createElement("button");
-        button.className = "time-rule";
+        button.className = "time-rule-card";
         button.type = "button";
+        const rows = allDisplaySlots().map((slot) => `
+          <div class="time-rule-row">
+            <strong>${escapeHtml(slot.label)}</strong>
+            <span>${escapeHtml(group.rules[slot.id] || "待確認")}</span>
+          </div>
+        `).join("");
         button.innerHTML = `
-          <strong>${slot.label}</strong>
-          <span>${summary || "尚未設定"}</span>
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <div class="time-rule-head">
+            <strong>${escapeHtml(formatRuleRange(group))}</strong>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+          <div class="time-rule-list">${rows}</div>
         `;
-        button.addEventListener("click", () => editTimeRule(slot));
+        button.addEventListener("click", () => editTimeRuleGroup(group));
         timeRules.appendChild(button);
       });
     }
 
-    function editTimeRule(slot) {
-      const current = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id)
-        .map((rule) => `${rule.start || ""}~${rule.end || ""}｜${rule.text}`)
-        .join("\n");
+    function editTimeRuleGroup(group) {
+      const current = [
+        `期間｜${group.start || ""}~${group.end || ""}`,
+        ...allDisplaySlots().map((slot) => `${slot.label}｜${group.rules[slot.id] || ""}`)
+      ].join("\n");
       const next = prompt(
-        `編輯「${slot.label}」時間規則\n每行一段期間，格式：開始日期~結束日期｜內容\n例：2026-07-10~2026-07-20｜真真 7:30 / 樂樂 8:00\n例：2026-07-21~｜樂樂週一 14:00、週二 15:00、週三 18:00 / 真真 15:30`,
+        `編輯日期區間卡\n格式：期間｜開始日期~結束日期\n每個項目一行，例如：\n早上送託｜真真 7:30 / 樂樂 8:00\n放學接回｜真真 15:30；樂樂 週一 14:00 / 週二 15:00 / 週三 18:00`,
         current
       );
       if (next === null) return;
-      const parsedRules = next.split("\n").map((line) => {
-        if (!line.includes("｜")) {
-          return { start: todayKey(), end: "", text: line.trim() };
+      const updates = {};
+      let nextStart = group.start || todayKey();
+      let nextEnd = group.end || "";
+
+      next.split("\n").forEach((line) => {
+        if (!line.trim() || !line.includes("｜")) return;
+        const [label = "", ...valueParts] = line.split("｜");
+        const value = valueParts.join("｜").trim();
+        if (label.trim() === "期間") {
+          const [start = "", end = ""] = value.split("~").map((part) => part.trim());
+          nextStart = start || todayKey();
+          nextEnd = end || "";
+          return;
         }
-        const [range = "", ...textParts] = line.split("｜");
-        const [start = "", end = ""] = range.split("~").map((part) => part.trim());
-        return { start, end, text: textParts.join("｜").trim() };
-      }).filter((rule) => rule.text);
+        const slot = allDisplaySlots().find((item) => item.label === label.trim());
+        if (slot) updates[slot.id] = value;
+      });
+
       commitHistory();
-      state.timeRules[slot.id] = parsedRules.length ? parsedRules : structuredClone(defaultTimeRules[slot.id] || []);
+      allDisplaySlots().forEach((slot) => {
+        const remaining = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id)
+          .filter((rule) => !(rule.start === group.start && rule.end === group.end));
+        if (updates[slot.id]) {
+          remaining.push({ start: nextStart, end: nextEnd, text: updates[slot.id] });
+        }
+        state.timeRules[slot.id] = remaining.length ? remaining : structuredClone(defaultTimeRules[slot.id] || []);
+      });
       render();
-      showToast("已更新時間規則");
+      showToast("已更新日期區間");
     }
 
     function render() {
