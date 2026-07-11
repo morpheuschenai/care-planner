@@ -1132,14 +1132,6 @@
       school_pickup: [
         { start: "2026-07-10", end: "2026-07-20", text: "真真 15:30；樂樂 週一 14:00 / 週二 15:00 / 週三 18:00 / 週四 15:00 / 週五 15:00" },
         { start: "2026-07-21", end: "", text: "待確認" }
-      ],
-      evening_care: [
-        { start: "2026-07-10", end: "2026-07-20", text: "19:00 後" },
-        { start: "2026-07-21", end: "", text: "待確認" }
-      ],
-      all_day_care: [
-        { start: "2026-07-10", end: "2026-07-20", text: "週末整日" },
-        { start: "2026-07-21", end: "", text: "待確認" }
       ]
     };
 
@@ -1260,7 +1252,7 @@
 
     function getTimeRuleGroups() {
       const groups = new Map();
-      allDisplaySlots().forEach((slot) => {
+      timeRuleSlots().forEach((slot) => {
         normalizeTimeRuleSet(state.timeRules[slot.id], slot.id).forEach((rule) => {
           const key = `${rule.start || ""}|${rule.end || ""}`;
           if (!groups.has(key)) {
@@ -1458,13 +1450,19 @@
       return [...module.weekdaySlots, ...module.weekendSlots];
     }
 
+    function timeRuleSlots() {
+      return modules[state.activeModule].weekdaySlots.filter((slot) =>
+        ["morning_dropoff", "school_pickup"].includes(slot.id)
+      );
+    }
+
     function renderTimeRules() {
       timeRules.innerHTML = "";
       getTimeRuleGroups().forEach((group) => {
         const button = document.createElement("button");
         button.className = "time-rule-card";
         button.type = "button";
-        const rows = allDisplaySlots().map((slot) => `
+        const rows = timeRuleSlots().map((slot) => `
           <div class="time-rule-row">
             <strong>${escapeHtml(slot.label)}</strong>
             <span>${escapeHtml(group.rules[slot.id] || "待確認")}</span>
@@ -1485,7 +1483,7 @@
     function editTimeRuleGroup(group) {
       const current = [
         `期間｜${group.start || ""}~${group.end || ""}`,
-        ...allDisplaySlots().map((slot) => `${slot.label}｜${group.rules[slot.id] || ""}`)
+        ...timeRuleSlots().map((slot) => `${slot.label}｜${group.rules[slot.id] || ""}`)
       ].join("\n");
       const next = prompt(
         `編輯日期區間卡\n格式：期間｜開始日期~結束日期\n每個項目一行，例如：\n早上送託｜真真 7:30 / 樂樂 8:00\n放學接回｜真真 15:30；樂樂 週一 14:00 / 週二 15:00 / 週三 18:00`,
@@ -1506,12 +1504,12 @@
           nextEnd = end || "";
           return;
         }
-        const slot = allDisplaySlots().find((item) => item.label === label.trim());
+        const slot = timeRuleSlots().find((item) => item.label === label.trim());
         if (slot) updates[slot.id] = value;
       });
 
       commitHistory();
-      allDisplaySlots().forEach((slot) => {
+      timeRuleSlots().forEach((slot) => {
         const remaining = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id)
           .filter((rule) => !(rule.start === group.start && rule.end === group.end));
         if (updates[slot.id]) {
