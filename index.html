@@ -319,6 +319,50 @@
       border-color: var(--ink);
     }
 
+    .mode-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 11px;
+      color: var(--muted);
+      background: rgba(255, 250, 240, .62);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    body.is-editing .mode-pill {
+      color: #453817;
+      background: #f6edcc;
+      border-color: rgba(198, 161, 91, .38);
+    }
+
+    body:not(.is-editing) .person-card,
+    body:not(.is-editing) .assignment-chip {
+      cursor: default;
+    }
+
+    body:not(.is-editing) .person-card {
+      opacity: .68;
+    }
+
+    body:not(.is-editing) .time-rule-card {
+      cursor: default;
+    }
+
+    body:not(.is-editing) .time-rule-head svg {
+      display: none;
+    }
+
+    body:not(.is-editing) .slot-menu-button {
+      display: none;
+    }
+
+    body:not(.is-editing) .empty-state .icon {
+      opacity: .18;
+    }
+
     .workspace {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -1047,13 +1091,15 @@
           <button class="text-button" id="todayAction" type="button">今天</button>
           <button class="text-button" id="togglePastAction" type="button">顯示過去</button>
           <button class="text-button" id="syncCalendar" type="button">同步日曆</button>
+          <span class="mode-pill" id="modeStatus">查看模式</span>
           <button class="icon-button" id="undoAction" type="button" title="復原" aria-label="復原">
             <svg class="icon" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
           </button>
           <button class="icon-button" id="redoAction" type="button" title="重做" aria-label="重做">
             <svg class="icon" viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg>
           </button>
-          <button class="text-button primary" id="saveData" type="button">儲存</button>
+          <button class="text-button" id="cancelEdit" type="button" hidden>取消</button>
+          <button class="text-button primary" id="saveData" type="button">編輯</button>
         </div>
       </header>
 
@@ -1199,8 +1245,13 @@
     const redoButton = document.querySelector("#redoAction");
     const todayButton = document.querySelector("#todayAction");
     const togglePastButton = document.querySelector("#togglePastAction");
+    const saveButton = document.querySelector("#saveData");
+    const cancelEditButton = document.querySelector("#cancelEdit");
+    const modeStatus = document.querySelector("#modeStatus");
     let activeSlot = null;
     let autoExtendPausedUntil = 0;
+    let isEditing = false;
+    let editBaseline = null;
 
     function toDate(dateKey) {
       return new Date(`${dateKey}T00:00:00`);
@@ -1327,9 +1378,51 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    function saveState() {
+    function enterEditMode() {
+      editBaseline = snapshot();
+      history.undo = [];
+      history.redo = [];
+      isEditing = true;
+      closePopover();
+      render();
+      showToast("已進入編輯模式");
+    }
+
+    function saveEditMode() {
       persistState();
+      editBaseline = null;
+      history.undo = [];
+      history.redo = [];
+      isEditing = false;
+      closePopover();
+      render();
       showToast("已儲存");
+    }
+
+    function cancelEditMode() {
+      if (!isEditing || !editBaseline) return;
+      restoreSnapshot(editBaseline);
+      editBaseline = null;
+      history.undo = [];
+      history.redo = [];
+      isEditing = false;
+      closePopover();
+      render();
+      showToast("已取消編輯");
+    }
+
+    function saveState() {
+      if (!isEditing) {
+        enterEditMode();
+        return;
+      }
+      saveEditMode();
+    }
+
+    function requireEditing() {
+      if (isEditing) return true;
+      showToast("目前是查看模式，請先按「編輯」");
+      return false;
     }
 
     function loadState() {
@@ -1374,10 +1467,10 @@
       state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(nextState.visibleDays) || INITIAL_VISIBLE_DAYS);
       closePopover();
       render();
-      persistState();
     }
 
     function commitHistory() {
+      if (!isEditing) return;
       history.undo.push(snapshot());
       if (history.undo.length > 80) history.undo.shift();
       history.redo = [];
@@ -1385,22 +1478,22 @@
     }
 
     function undo() {
-      if (!history.undo.length) return;
+      if (!isEditing || !history.undo.length) return;
       history.redo.push(snapshot());
       restoreSnapshot(history.undo.pop());
       showToast("已復原");
     }
 
     function redo() {
-      if (!history.redo.length) return;
+      if (!isEditing || !history.redo.length) return;
       history.undo.push(snapshot());
       restoreSnapshot(history.redo.pop());
       showToast("已重做");
     }
 
     function updateHistoryButtons() {
-      undoButton.disabled = history.undo.length === 0;
-      redoButton.disabled = history.redo.length === 0;
+      undoButton.disabled = !isEditing || history.undo.length === 0;
+      redoButton.disabled = !isEditing || history.redo.length === 0;
     }
 
     function showToast(message) {
@@ -1449,6 +1542,7 @@
     }
 
     function assignPerson(dateKey, slotId, personId, source) {
+      if (!requireEditing()) return;
       commitHistory();
       state.assignments[dateKey] = state.assignments[dateKey] || {};
       state.assignments[dateKey][slotId] = personId;
@@ -1461,18 +1555,18 @@
       }
 
       render();
-      persistState();
     }
 
     function removeAssignment(dateKey, slotId) {
+      if (!requireEditing()) return;
       if (!state.assignments[dateKey]) return;
       commitHistory();
       delete state.assignments[dateKey][slotId];
       render();
-      persistState();
     }
 
     function saveNote(dateKey, slotId, note) {
+      if (!requireEditing()) return;
       commitHistory();
       const key = getNoteKey(dateKey, slotId);
       const trimmed = note.trim();
@@ -1482,7 +1576,6 @@
         delete state.notes[key];
       }
       render();
-      persistState();
       showToast(trimmed ? "已儲存備註" : "已清除備註");
     }
 
@@ -1516,12 +1609,19 @@
           </div>
           <div class="time-rule-list">${rows}</div>
         `;
-        button.addEventListener("click", () => editTimeRuleGroup(group));
+        button.addEventListener("click", () => {
+          if (!isEditing) {
+            showToast("目前是查看模式，請先按「編輯」");
+            return;
+          }
+          editTimeRuleGroup(group);
+        });
         timeRules.appendChild(button);
       });
     }
 
     function editTimeRuleGroup(group) {
+      if (!requireEditing()) return;
       const current = [
         `期間｜${group.start || ""}~${group.end || ""}`,
         ...timeRuleSlots().map((slot) => `${slot.label}｜${group.rules[slot.id] || ""}`)
@@ -1559,11 +1659,18 @@
         state.timeRules[slot.id] = remaining.length ? remaining : structuredClone(defaultTimeRules[slot.id] || []);
       });
       render();
-      persistState();
       showToast("已更新日期區間");
     }
 
     function render() {
+      document.body.classList.toggle("is-editing", isEditing);
+      modeStatus.textContent = isEditing ? "編輯中" : "查看模式";
+      saveButton.textContent = isEditing ? "儲存" : "編輯";
+      cancelEditButton.hidden = !isEditing;
+      document.querySelectorAll(".person-card").forEach((card) => {
+        card.draggable = isEditing;
+        card.setAttribute("aria-disabled", String(!isEditing));
+      });
       renderTimeRules();
       renderBoard();
       renderSummary();
@@ -1729,6 +1836,7 @@
       menuButton.setAttribute("aria-label", "編輯安排");
       menuButton.addEventListener("click", (event) => {
         event.stopPropagation();
+        if (!requireEditing()) return;
         openSlotMenu(slotEl, dateKey, slot);
       });
       slotEl.appendChild(menuButton);
@@ -1751,9 +1859,13 @@
         const chip = document.createElement("div");
         chip.className = "assignment-chip";
         chip.dataset.person = personId;
-        chip.draggable = true;
+        chip.draggable = isEditing;
         chip.innerHTML = `<strong>${people[personId].label}</strong>`;
         chip.addEventListener("dragstart", (event) => {
+          if (!isEditing) {
+            event.preventDefault();
+            return;
+          }
           setDragPayload(event, { personId, source: { dateKey, slotId: slot.id } });
         });
         slotEl.appendChild(chip);
@@ -1765,11 +1877,13 @@
       }
 
       slotEl.addEventListener("dragover", (event) => {
+        if (!isEditing) return;
         event.preventDefault();
         slotEl.classList.add("drag-over");
       });
       slotEl.addEventListener("dragleave", () => slotEl.classList.remove("drag-over"));
       slotEl.addEventListener("drop", (event) => {
+        if (!isEditing) return;
         event.preventDefault();
         slotEl.classList.remove("drag-over");
         const payload = readDragPayload(event);
@@ -1778,6 +1892,7 @@
       });
       slotEl.addEventListener("click", (event) => {
         if (event.target.closest(".slot-menu-button")) return;
+        if (!requireEditing()) return;
         openSlotMenu(slotEl, dateKey, slot);
       });
 
@@ -1966,11 +2081,17 @@
 
     document.querySelectorAll(".person-card").forEach((card) => {
       card.addEventListener("dragstart", (event) => {
+        if (!isEditing) {
+          event.preventDefault();
+          showToast("目前是查看模式，請先按「編輯」");
+          return;
+        }
         setDragPayload(event, { personId: card.dataset.person });
       });
     });
 
-    document.querySelector("#saveData").addEventListener("click", saveState);
+    saveButton.addEventListener("click", saveState);
+    cancelEditButton.addEventListener("click", cancelEditMode);
     undoButton.addEventListener("click", undo);
     redoButton.addEventListener("click", redo);
     document.querySelector("#prevWeek").addEventListener("click", () => {
@@ -2020,7 +2141,7 @@
 
     document.addEventListener("keydown", (event) => {
       const modifier = event.metaKey || event.ctrlKey;
-      if (!modifier) return;
+      if (!modifier || !isEditing) return;
       const key = event.key.toLowerCase();
       if (key === "z" && !event.shiftKey) {
         event.preventDefault();
@@ -2037,6 +2158,12 @@
     if (boardWrap) {
       boardWrap.addEventListener("scroll", maybeExtendVisibleDays, { passive: true });
     }
+
+    window.addEventListener("beforeunload", (event) => {
+      if (!isEditing) return;
+      event.preventDefault();
+      event.returnValue = "";
+    });
 
     loadState();
     render();
