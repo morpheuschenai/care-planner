@@ -1246,6 +1246,7 @@
     const redoButton = document.querySelector("#redoAction");
     const todayButton = document.querySelector("#todayAction");
     const togglePastButton = document.querySelector("#togglePastAction");
+    const syncButton = document.querySelector("#syncCalendar");
     const saveButton = document.querySelector("#saveData");
     const cancelEditButton = document.querySelector("#cancelEdit");
     const modeStatus = document.querySelector("#modeStatus");
@@ -1253,6 +1254,7 @@
     let autoExtendPausedUntil = 0;
     let isEditing = false;
     let editBaseline = null;
+    let syncInFlight = false;
 
     function toDate(dateKey) {
       return new Date(`${dateKey}T00:00:00`);
@@ -2047,12 +2049,17 @@
     }
 
     async function syncToCalendar() {
+      if (syncInFlight) return;
       const defaultToken = localStorage.getItem(SYNC_TOKEN_KEY) || CARE_PLANNER_SYNC_TOKEN;
       const syncToken = normalizeSyncToken(defaultToken);
       if (!syncToken) return;
       localStorage.setItem(SYNC_TOKEN_KEY, syncToken);
 
       const events = buildSyncEvents();
+      syncInFlight = true;
+      syncButton.disabled = true;
+      syncButton.textContent = "同步中…";
+      showToast("同步中…");
       try {
         const response = await fetch(CARE_PLANNER_SYNC_URL, {
           method: "POST",
@@ -2081,6 +2088,10 @@
           return;
         }
         showToast(error.message || "同步失敗");
+      } finally {
+        syncInFlight = false;
+        syncButton.disabled = false;
+        syncButton.textContent = "同步日曆";
       }
     }
 
@@ -2130,7 +2141,7 @@
       render();
     });
     document.querySelector("#downloadIcs").addEventListener("click", downloadIcs);
-    document.querySelector("#syncCalendar").addEventListener("click", syncToCalendar);
+    syncButton.addEventListener("click", syncToCalendar);
     document.querySelector("#closePopover").addEventListener("click", closePopover);
     document.querySelector("#saveNote").addEventListener("click", () => {
       if (!activeSlot) return;
