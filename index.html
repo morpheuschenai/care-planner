@@ -1164,6 +1164,7 @@
     const SYNC_TOKEN_KEY = "family-ops-care-sync-token";
     const CARE_PLANNER_SYNC_URL = "https://web-production-ee902.up.railway.app/api/care-planner/sync";
     const CARE_PLANNER_CALENDAR_ID = "f6v16h6sav5134f00ovglhunqo@group.calendar.google.com";
+    const CARE_PLANNER_SYNC_TOKEN = "uB4FvFyJGp-G3BDb0DA4pIe48i5Ic2Em6za8LXiHyZ4";
     const INITIAL_VISIBLE_DAYS = 14;
     const EXTEND_DAYS = 7;
     const MOBILE_QUERY = "(max-width: 720px)";
@@ -2046,8 +2047,8 @@
     }
 
     async function syncToCalendar() {
-      const defaultToken = localStorage.getItem(SYNC_TOKEN_KEY) || "";
-      const syncToken = defaultToken || normalizeSyncToken(prompt("請輸入同步密碼", ""));
+      const defaultToken = localStorage.getItem(SYNC_TOKEN_KEY) || CARE_PLANNER_SYNC_TOKEN;
+      const syncToken = normalizeSyncToken(defaultToken);
       if (!syncToken) return;
       localStorage.setItem(SYNC_TOKEN_KEY, syncToken);
 
@@ -2069,7 +2070,7 @@
         if (!response.ok) {
           if (response.status === 401) {
             localStorage.removeItem(SYNC_TOKEN_KEY);
-            throw new Error("同步密碼不正確，已清除舊密碼，請重新輸入");
+            throw new Error("同步設定已失效，請聯絡維護者更新");
           }
           throw new Error(result.error || "同步失敗");
         }
