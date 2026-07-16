@@ -2047,7 +2047,7 @@
 
     async function syncToCalendar() {
       const defaultToken = localStorage.getItem(SYNC_TOKEN_KEY) || "";
-      const syncToken = normalizeSyncToken(prompt("請輸入同步密碼", defaultToken));
+      const syncToken = defaultToken || normalizeSyncToken(prompt("請輸入同步密碼", ""));
       if (!syncToken) return;
       localStorage.setItem(SYNC_TOKEN_KEY, syncToken);
 
@@ -2075,6 +2075,10 @@
         }
         showToast(`已同步 ${result.inserted || events.length} 筆`);
       } catch (error) {
+        if (error instanceof TypeError) {
+          showToast("同步服務目前無法連線");
+          return;
+        }
         showToast(error.message || "同步失敗");
       }
     }
