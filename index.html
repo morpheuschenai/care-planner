@@ -50,62 +50,7 @@
     }
 
     .app-shell {
-      display: grid;
-      grid-template-columns: 260px minmax(0, 1fr);
       min-height: 100vh;
-    }
-
-    .sidebar {
-      padding: 24px 18px;
-      border-right: 1px solid var(--line);
-      background: rgba(255, 250, 240, .76);
-      backdrop-filter: blur(10px);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .brand-mark {
-      display: grid;
-      width: 42px;
-      height: 42px;
-      place-items: center;
-      color: #fff;
-      background: var(--ink);
-      border-radius: var(--radius);
-      font-family: Georgia, serif;
-      font-size: 22px;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-family: Georgia, "Noto Serif TC", serif;
-      font-size: 22px;
-      line-height: 1;
-    }
-
-    .brand p {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .section-title {
-      margin: 24px 0 10px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .person-tray {
-      display: grid;
-      gap: 10px;
     }
 
     .person-card,
@@ -168,35 +113,6 @@
       place-items: center;
       color: currentColor;
       opacity: .54;
-    }
-
-    .module-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .module-button {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 11px 12px;
-      color: var(--ink);
-      background: rgba(255, 255, 255, .45);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      text-align: left;
-    }
-
-    .module-button.active {
-      color: #fff;
-      background: var(--ink);
-      border-color: var(--ink);
-    }
-
-    .module-button[disabled] {
-      color: #9a907f;
-      cursor: not-allowed;
     }
 
     .main {
@@ -387,7 +303,15 @@
     }
 
     .mobile-person-dock {
-      display: none;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 8px;
+      width: min(560px, 100%);
+      padding: 8px;
+      background: rgba(247, 243, 234, .78);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
     }
 
     .week-board {
@@ -839,30 +763,14 @@
     }
 
     @media (max-width: 1080px) {
-      .app-shell,
       .workspace {
         grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .person-tray,
-      .module-list {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
     @media (max-width: 720px) {
-      .main,
-      .sidebar {
+      .main {
         padding: 16px;
-      }
-
-      .sidebar {
-        display: none;
       }
 
       .topbar {
@@ -893,8 +801,6 @@
         grid-template-columns: 64px minmax(0, 1fr);
       }
 
-      .person-tray,
-      .module-list,
       .stat-grid {
         grid-template-columns: 1fr;
       }
@@ -903,15 +809,9 @@
         position: sticky;
         top: 0;
         z-index: 12;
-        display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
         margin-bottom: 4px;
-        padding: 8px;
         background: rgba(247, 243, 234, .92);
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        backdrop-filter: blur(10px);
       }
 
       .mobile-person-dock .person-card {
@@ -1027,54 +927,6 @@
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">M</div>
-        <div>
-          <h1>家庭分工</h1>
-          <p>照顧、家務與未來模組的協作工作台</p>
-        </div>
-      </div>
-
-      <div class="section-title">成員</div>
-      <div class="person-tray" aria-label="可拖曳成員">
-        <div class="person-card" data-person="mo" draggable="true">
-          <strong>Mo</strong>
-          <span class="drag-handle" aria-hidden="true">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
-          </span>
-        </div>
-        <div class="person-card" data-person="lisa" draggable="true">
-          <strong>Lisa</strong>
-          <span class="drag-handle" aria-hidden="true">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
-          </span>
-        </div>
-        <div class="person-card" data-person="both" draggable="true">
-          <strong>Mo / Lisa</strong>
-          <span class="drag-handle" aria-hidden="true">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
-          </span>
-        </div>
-      </div>
-
-      <div class="section-title">模組</div>
-      <div class="module-list">
-        <button class="module-button active" type="button">
-          <span>小孩照顧</span>
-          <span>現在</span>
-        </button>
-        <button class="module-button" type="button" disabled>
-          <span>資產分配</span>
-          <span>預留</span>
-        </button>
-        <button class="module-button" type="button" disabled>
-          <span>家務任務</span>
-          <span>預留</span>
-        </button>
-      </div>
-    </aside>
-
     <main class="main">
       <header class="topbar">
         <div class="title-block">
@@ -1433,16 +1285,13 @@
       if (!saved) return;
       try {
         const parsed = JSON.parse(saved);
-        state.weekStart = parsed.weekStart || state.weekStart;
         state.activeModule = parsed.activeModule || state.activeModule;
         state.assignments = parsed.assignments || state.assignments;
         state.notes = parsed.notes || {};
         state.timeRules = normalizeTimeRules(parsed.timeRules || {});
-        state.showPast = Boolean(parsed.showPast);
-        state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(parsed.visibleDays) || INITIAL_VISIBLE_DAYS);
-        if (!state.showPast && compareDateKeys(state.weekStart, todayKey()) < 0) {
-          state.weekStart = todayKey();
-        }
+        state.weekStart = todayKey();
+        state.showPast = false;
+        state.visibleDays = INITIAL_VISIBLE_DAYS;
       } catch {
         showToast("讀取儲存資料失敗，已使用初始版本");
       }
