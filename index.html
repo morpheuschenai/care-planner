@@ -53,7 +53,6 @@
       min-height: 100vh;
     }
 
-    .person-card,
     .assignment-chip {
       display: flex;
       align-items: center;
@@ -65,32 +64,24 @@
       user-select: none;
     }
 
-    .person-card {
-      box-shadow: 0 8px 24px rgba(55, 43, 28, .09);
-    }
-
-    .person-card[data-person="mo"],
     .assignment-chip[data-person="mo"] {
       color: #113d39;
       background: var(--mo-soft);
       border-color: rgba(31, 111, 104, .24);
     }
 
-    .person-card[data-person="lisa"],
     .assignment-chip[data-person="lisa"] {
       color: #65311f;
       background: var(--lisa-soft);
       border-color: rgba(154, 79, 52, .24);
     }
 
-    .person-card[data-person="both"],
     .assignment-chip[data-person="both"] {
       color: #453817;
       background: #f6edcc;
       border-color: rgba(198, 161, 91, .34);
     }
 
-    .person-card:active,
     .assignment-chip:active {
       cursor: grabbing;
     }
@@ -116,7 +107,7 @@
     }
 
     .main {
-      padding: 24px;
+      padding: 20px 24px 24px;
       overflow: hidden;
     }
 
@@ -124,14 +115,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 18px;
+      gap: 14px;
+      margin-bottom: 10px;
     }
 
     .title-block h2 {
       margin: 0;
       font-family: Georgia, "Noto Serif TC", serif;
-      font-size: clamp(28px, 4vw, 52px);
+      font-size: clamp(28px, 3.2vw, 46px);
       line-height: 1;
     }
 
@@ -143,9 +134,9 @@
 
     .time-rules {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
-      margin-top: 14px;
+      margin-bottom: 14px;
     }
 
     .time-rule-card {
@@ -204,17 +195,33 @@
       line-height: 1.42;
     }
 
+    .time-rule-add {
+      display: grid;
+      min-height: 86px;
+      place-items: center;
+      color: var(--muted);
+      background: rgba(255, 250, 240, .58);
+      border: 1px dashed rgba(198, 161, 91, .5);
+      border-radius: var(--radius);
+      box-shadow: 0 6px 18px rgba(55, 43, 28, .04);
+    }
+
+    .time-rule-add .icon {
+      width: 22px;
+      height: 22px;
+    }
+
     .actions {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
-      gap: 8px;
+      gap: 6px;
     }
 
     .icon-button,
     .text-button {
-      min-height: 38px;
-      padding: 9px 12px;
+      min-height: 36px;
+      padding: 8px 10px;
       color: var(--ink);
       background: var(--panel);
       border: 1px solid var(--line);
@@ -254,13 +261,8 @@
       border-color: rgba(198, 161, 91, .38);
     }
 
-    body:not(.is-editing) .person-card,
     body:not(.is-editing) .assignment-chip {
       cursor: default;
-    }
-
-    body:not(.is-editing) .person-card {
-      opacity: .68;
     }
 
     body:not(.is-editing) .time-rule-card {
@@ -300,18 +302,6 @@
 
     .inspector {
       display: none;
-    }
-
-    .mobile-person-dock {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(120px, 1fr));
-      gap: 8px;
-      width: min(560px, 100%);
-      padding: 8px;
-      background: rgba(247, 243, 234, .78);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      backdrop-filter: blur(10px);
     }
 
     .week-board {
@@ -774,7 +764,7 @@
       }
 
       .topbar {
-        align-items: stretch;
+        align-items: flex-start;
         flex-direction: column;
         margin-bottom: 12px;
       }
@@ -790,7 +780,7 @@
       .time-rules {
         grid-template-columns: 1fr;
         gap: 8px;
-        margin-top: 10px;
+        margin-bottom: 10px;
       }
 
       .time-rule-card {
@@ -803,26 +793,6 @@
 
       .stat-grid {
         grid-template-columns: 1fr;
-      }
-
-      .mobile-person-dock {
-        position: sticky;
-        top: 0;
-        z-index: 12;
-        grid-template-columns: 1fr 1fr;
-        margin-bottom: 4px;
-        background: rgba(247, 243, 234, .92);
-      }
-
-      .mobile-person-dock .person-card {
-        min-height: 38px;
-        padding: 8px 10px;
-        box-shadow: none;
-      }
-
-      .mobile-person-dock .drag-handle {
-        width: 24px;
-        height: 24px;
       }
 
       .workspace {
@@ -931,7 +901,6 @@
       <header class="topbar">
         <div class="title-block">
           <h2>照顧分工</h2>
-          <div class="time-rules" id="timeRules" aria-label="接送與照顧時間規則"></div>
         </div>
         <div class="actions">
           <button class="icon-button" id="prevWeek" type="button" title="上一週" aria-label="上一週">
@@ -954,28 +923,9 @@
           <button class="text-button primary" id="saveData" type="button">編輯</button>
         </div>
       </header>
+      <section class="time-rules" id="timeRules" aria-label="接送與照顧時間規則"></section>
 
       <div class="workspace">
-        <div class="mobile-person-dock" aria-label="手機可拖曳成員">
-          <div class="person-card" data-person="mo" draggable="true">
-            <strong>Mo</strong>
-            <span class="drag-handle" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
-            </span>
-          </div>
-          <div class="person-card" data-person="lisa" draggable="true">
-            <strong>Lisa</strong>
-            <span class="drag-handle" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
-            </span>
-          </div>
-          <div class="person-card" data-person="both" draggable="true">
-            <strong>Mo / Lisa</strong>
-            <span class="drag-handle" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M5 12h14"/><path d="M5 16h14"/></svg>
-            </span>
-          </div>
-        </div>
         <section class="board-wrap" aria-label="分工月曆">
           <div class="week-board" id="weekBoard"></div>
         </section>
@@ -1444,7 +1394,8 @@
 
     function renderTimeRules() {
       timeRules.innerHTML = "";
-      getTimeRuleGroups().forEach((group) => {
+      const groups = getTimeRuleGroups().slice(0, 2);
+      groups.forEach((group) => {
         const button = document.createElement("button");
         button.className = "time-rule-card";
         button.type = "button";
@@ -1470,6 +1421,37 @@
         });
         timeRules.appendChild(button);
       });
+      if (groups.length < 2) {
+        const addButton = document.createElement("button");
+        addButton.className = "time-rule-add";
+        addButton.type = "button";
+        addButton.title = "新增日期區間";
+        addButton.setAttribute("aria-label", "新增日期區間");
+        addButton.innerHTML = iconSvg("plus");
+        addButton.addEventListener("click", addTimeRuleGroup);
+        timeRules.appendChild(addButton);
+      }
+    }
+
+    function addTimeRuleGroup() {
+      if (!requireEditing()) return;
+      const groups = getTimeRuleGroups();
+      if (groups.length >= 2) {
+        showToast("最多兩張日期區間卡");
+        return;
+      }
+      const latest = groups.at(-1);
+      const nextStart = latest?.end
+        ? addDays(latest.end, 1)
+        : addDays(latest?.start || todayKey(), 7);
+      commitHistory();
+      timeRuleSlots().forEach((slot) => {
+        const rules = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id);
+        rules.push({ start: nextStart, end: "", text: "待確認" });
+        state.timeRules[slot.id] = rules;
+      });
+      render();
+      showToast("已新增日期區間");
     }
 
     function editTimeRuleGroup(group) {
@@ -1519,10 +1501,6 @@
       modeStatus.textContent = isEditing ? "編輯中" : "查看模式";
       saveButton.textContent = isEditing ? "儲存" : "編輯";
       cancelEditButton.hidden = !isEditing;
-      document.querySelectorAll(".person-card").forEach((card) => {
-        card.draggable = isEditing;
-        card.setAttribute("aria-disabled", String(!isEditing));
-      });
       renderTimeRules();
       renderBoard();
       renderSummary();
@@ -1566,9 +1544,7 @@
         if (window.matchMedia(MOBILE_QUERY).matches) {
           const todayCard = board.querySelector(`.mobile-day[data-date="${today}"]`);
           if (todayCard) {
-            const dock = document.querySelector(".mobile-person-dock");
-            const dockHeight = dock ? dock.getBoundingClientRect().height : 0;
-            const targetTop = todayCard.getBoundingClientRect().top + window.scrollY - dockHeight - 12;
+            const targetTop = todayCard.getBoundingClientRect().top + window.scrollY - 12;
             window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
           }
           return;
@@ -1943,17 +1919,6 @@
         syncButton.textContent = "同步日曆";
       }
     }
-
-    document.querySelectorAll(".person-card").forEach((card) => {
-      card.addEventListener("dragstart", (event) => {
-        if (!isEditing) {
-          event.preventDefault();
-          showToast("目前是查看模式，請先按「編輯」");
-          return;
-        }
-        setDragPayload(event, { personId: card.dataset.person });
-      });
-    });
 
     saveButton.addEventListener("click", saveState);
     cancelEditButton.addEventListener("click", cancelEditMode);
