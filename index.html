@@ -126,6 +126,44 @@
       line-height: 1;
     }
 
+    .view-tabs {
+      display: inline-flex;
+      gap: 4px;
+      margin-top: 10px;
+      padding: 4px;
+      background: rgba(255, 250, 240, .82);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    .view-tab {
+      min-height: 32px;
+      padding: 7px 12px;
+      color: var(--muted);
+      background: transparent;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .view-tab[aria-selected="true"] {
+      color: #fff;
+      background: var(--ink);
+    }
+
+    .app-view {
+      display: none;
+    }
+
+    .app-view.active {
+      display: block;
+    }
+
+    body[data-view="ops"] .actions {
+      display: none;
+    }
+
     .title-block p {
       margin: 10px 0 0;
       color: var(--muted);
@@ -415,6 +453,54 @@
       font-size: 19px;
     }
 
+    .ops-row-label {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      display: grid;
+      align-content: center;
+      padding: 10px 12px;
+      background: rgba(255, 250, 240, .96);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ops-row-label strong {
+      font-size: 12px;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    .ops-day-cell {
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      min-height: 96px;
+      padding: 7px;
+      background: rgba(255, 250, 240, .42);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ops-day-chip {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 6px;
+      align-items: start;
+      padding: 7px 8px;
+      color: #433722;
+      background: rgba(246, 237, 204, .72);
+      border: 1px solid rgba(198, 161, 91, .24);
+      border-radius: var(--radius);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.28;
+    }
+
+    .ops-day-chip span:last-child {
+      min-width: 0;
+    }
+
     .slot.drag-over {
       background: #fffdf8;
       border-color: var(--accent);
@@ -618,6 +704,202 @@
       border-radius: var(--radius);
     }
 
+    .ops-page {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .ops-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .ops-head h2 {
+      margin: 0;
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .perspective-switch {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(255, 250, 240, .82);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    .perspective-switch button {
+      min-height: 32px;
+      padding: 7px 12px;
+      color: var(--muted);
+      background: transparent;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .perspective-switch button.active {
+      color: #fff;
+      background: var(--mo);
+    }
+
+    .ops-panel {
+      padding: 14px;
+      background: rgba(255, 250, 240, .82);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 24px rgba(63, 49, 30, .08);
+    }
+
+    .ops-panel + .ops-panel {
+      margin-top: 12px;
+    }
+
+    .ops-panel h3 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .ops-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .48);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .ops-timeline,
+    .ops-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .ops-event {
+      display: grid;
+      grid-template-columns: 62px 30px minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, .48);
+      border: 1px solid rgba(216, 205, 185, .74);
+      border-radius: var(--radius);
+    }
+
+    .ops-event time {
+      font-family: Georgia, serif;
+      font-weight: 800;
+      line-height: 1.05;
+    }
+
+    .ops-event time span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-family: "Avenir Next", "Noto Sans TC", "PingFang TC", sans-serif;
+      font-size: 11px;
+    }
+
+    .ops-icon {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      background: #f6edcc;
+      border-radius: var(--radius);
+    }
+
+    .ops-event-main strong,
+    .ops-rule strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .ops-event-main span,
+    .ops-rule span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .ops-status {
+      min-width: 54px;
+      padding: 5px 7px;
+      color: var(--muted);
+      background: rgba(116, 107, 94, .1);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .ops-status.soon {
+      color: #725411;
+      background: rgba(246, 237, 204, .88);
+    }
+
+    .ops-status.today {
+      color: #fff;
+      background: #9a4f34;
+    }
+
+    .ops-rule {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, .48);
+      border: 1px solid rgba(216, 205, 185, .74);
+      border-radius: var(--radius);
+    }
+
+    .ops-rule.pending {
+      background: rgba(246, 237, 204, .58);
+      border-color: rgba(198, 161, 91, .28);
+    }
+
+    .add-rule-button,
+    .agreement-button {
+      width: 100%;
+      min-height: 40px;
+      border-radius: var(--radius);
+      font-weight: 800;
+    }
+
+    .add-rule-button {
+      margin-bottom: 9px;
+      color: var(--mo);
+      background: rgba(223, 241, 236, .42);
+      border: 1px dashed rgba(31, 111, 104, .4);
+    }
+
+    .agreement-button {
+      color: #fff;
+      background: var(--ink);
+      border: 1px solid var(--ink);
+    }
+
     .toast {
       position: fixed;
       right: 22px;
@@ -773,6 +1055,18 @@
         justify-content: flex-start;
       }
 
+      body[data-view="ops"] .actions {
+        display: none;
+      }
+
+      .view-tabs {
+        width: 100%;
+      }
+
+      .view-tab {
+        flex: 1;
+      }
+
       .title-block h2 {
         font-size: 34px;
       }
@@ -855,6 +1149,10 @@
         border-bottom: 0;
       }
 
+      .mobile-slot-row.ops-mobile-row {
+        grid-template-columns: 82px minmax(0, 1fr);
+      }
+
       .mobile-slot-label {
         display: grid;
         align-content: center;
@@ -876,6 +1174,51 @@
       .mobile-slot-row .assignment-chip,
       .mobile-slot-row .empty-state {
         min-height: 46px;
+      }
+
+      .mobile-ops-list {
+        display: grid;
+        gap: 6px;
+        padding: 6px;
+      }
+
+      .mobile-ops-list:empty::before {
+        content: "今天沒有共同事務";
+        display: block;
+        padding: 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .ops-page {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .ops-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .ops-head h2 {
+        font-size: 28px;
+      }
+
+      .perspective-switch {
+        width: 100%;
+      }
+
+      .perspective-switch button {
+        flex: 1;
+      }
+
+      .ops-event {
+        grid-template-columns: 56px 30px minmax(0, 1fr);
+      }
+
+      .ops-status {
+        grid-column: 3;
+        width: fit-content;
       }
 
       .mobile-slot-row .slot.all-day .assignment-chip,
@@ -901,6 +1244,10 @@
       <header class="topbar">
         <div class="title-block">
           <h2>照顧分工</h2>
+          <nav class="view-tabs" aria-label="工作台切換">
+            <button class="view-tab" data-view="care" type="button" aria-selected="true">照顧分工</button>
+            <button class="view-tab" data-view="ops" type="button" aria-selected="false">共同事務</button>
+          </nav>
         </div>
         <div class="actions">
           <button class="icon-button" id="prevWeek" type="button" title="上一週" aria-label="上一週">
@@ -923,24 +1270,67 @@
           <button class="text-button primary" id="saveData" type="button">編輯</button>
         </div>
       </header>
-      <section class="time-rules" id="timeRules" aria-label="接送與照顧時間規則"></section>
+      <section class="app-view active" id="careView">
+        <section class="time-rules" id="timeRules" aria-label="接送與照顧時間規則"></section>
 
-      <div class="workspace">
-        <section class="board-wrap" aria-label="分工月曆">
-          <div class="week-board" id="weekBoard"></div>
-        </section>
+        <div class="workspace">
+          <section class="board-wrap" aria-label="分工月曆">
+            <div class="week-board" id="weekBoard"></div>
+          </section>
 
-        <aside class="inspector">
-          <h3>顯示範圍摘要</h3>
-          <div class="stat-grid" id="stats"></div>
-          <div class="timeline" id="timeline"></div>
-          <div class="calendar-box">
-            <strong>Google Calendar</strong>
-            <p>目前先提供 .ics 匯出，可匯入共享日曆。之後接 Google OAuth 後，可改成直接同步到指定日曆。</p>
-            <button id="downloadIcs" type="button">下載日曆檔</button>
+          <aside class="inspector">
+            <h3>顯示範圍摘要</h3>
+            <div class="stat-grid" id="stats"></div>
+            <div class="timeline" id="timeline"></div>
+            <div class="calendar-box">
+              <strong>Google Calendar</strong>
+              <p>目前先提供 .ics 匯出，可匯入共享日曆。之後接 Google OAuth 後，可改成直接同步到指定日曆。</p>
+              <button id="downloadIcs" type="button">下載日曆檔</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="app-view" id="opsView">
+        <div class="ops-head">
+          <h2>共同事務</h2>
+          <div class="perspective-switch" aria-label="視角切換">
+            <button class="active" data-perspective="morpheus" type="button">Morpheus</button>
+            <button data-perspective="lisa" type="button">Lisa</button>
           </div>
-        </aside>
-      </div>
+        </div>
+
+        <div class="ops-page">
+          <div>
+            <section class="ops-panel">
+              <h3><span>未來 30 天時間軸</span><span class="ops-pill" id="opsViewLabel">你要主動處理</span></h3>
+              <div class="ops-timeline" id="opsTimeline"></div>
+            </section>
+
+            <section class="ops-panel">
+              <h3>待討論</h3>
+              <div class="ops-list" id="opsPendingList"></div>
+            </section>
+          </div>
+
+          <aside>
+            <section class="ops-panel">
+              <h3>循環規則設定</h3>
+              <button class="add-rule-button" type="button">＋ 新增規則</button>
+              <div class="ops-list" id="opsRuleList"></div>
+            </section>
+
+            <section class="ops-panel">
+              <h3>條件觸發規則</h3>
+              <div class="ops-list" id="opsConditionList"></div>
+            </section>
+
+            <section class="ops-panel">
+              <button class="agreement-button" type="button">完整協議條款速查</button>
+            </section>
+          </aside>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -1017,6 +1407,35 @@
       ]
     };
 
+    const opsRules = [
+      { id: "lisa-richart", type: "monthlyDay", day: 10, icon: "💰", action: "匯 Lisa 台新 Richart", amount: 46200, owner: "morpheus", recipient: "lisa" },
+      { id: "roy-invest", type: "monthlyDay", day: 10, icon: "💰", action: "匯 Roy 名下帳戶", amount: 3000, owner: "morpheus", recipient: "roy" },
+      { id: "visit-2", type: "monthlyNthWeekday", nth: 2, weekday: 5, icon: "👶", action: "探視接送", detail: "每月第 2 個週五開始，連續 4 天 3 夜", owner: "both" },
+      { id: "visit-4", type: "monthlyNthWeekday", nth: 4, weekday: 5, icon: "👶", action: "探視接送", detail: "每月第 4 個週五開始，連續 4 天 3 夜", owner: "both" },
+      { id: "eason-birthday", type: "yearlyDate", month: 8, day: 22, icon: "🎂", action: "Eason 生日", owner: "both" },
+      { id: "roy-policy-aug", type: "yearlyDate", month: 8, day: 26, icon: "🏥", action: "Roy 保單扣款", detail: "南山 U012119361 + U012119370", amount: 20627, owner: "morpheus" },
+      { id: "eason-policy", type: "yearlyDate", month: 9, day: 2, icon: "🏥", action: "Eason 保單扣款", detail: "南山 U020553906 + U020553919 + U020553922", amount: 46971, owner: "morpheus" },
+      { id: "roy-birthday", type: "yearlyDate", month: 10, day: 23, icon: "🎂", action: "Roy 生日", owner: "both" },
+      { id: "roy-policy-nov", type: "yearlyDate", month: 11, day: 9, icon: "🏥", action: "Roy 保單扣款", detail: "南山 U001309890", amount: 23428, owner: "morpheus" },
+      { id: "tax", type: "yearlyDate", month: 5, day: 15, icon: "📚", action: "報稅：Morpheus 列 Eason 扶養", detail: "每年 5 月中", owner: "morpheus" }
+    ];
+
+    const opsPendingItems = [
+      { icon: "⚠️", title: "Eason 生日陪伴", detail: "生日前 30 日起開始討論", owner: "both" },
+      { icon: "⚠️", title: "Roy 帳戶投資標的", detail: "定存 / ETF / 定期定額基金", owner: "morpheus" },
+      { icon: "⚠️", title: "秋季開學學校資訊", detail: "每學期開學後 14 日內 Lisa 提供", owner: "lisa" }
+    ];
+
+    const opsConditionRules = [
+      "出差超過 5 日 → 7 日前通知",
+      "帶子女出國旅遊 → 7 日前通知，護照 7 日內歸還",
+      "遷離大台北超過 3 個月 → 60 日前通知",
+      "帶子女跨國遷居 → 6 個月前書面同意",
+      "重大醫療自付超過 NT$3 萬 → 事後 50/50",
+      "額外教育 → 事前同意才 50/50",
+      "失業 / 重疾 / 身障超過 3 個月 → 可申請降至 60% × 12 個月"
+    ];
+
     const state = {
       weekStart: "2026-07-09",
       activeModule: "childcare",
@@ -1052,11 +1471,22 @@
     const saveButton = document.querySelector("#saveData");
     const cancelEditButton = document.querySelector("#cancelEdit");
     const modeStatus = document.querySelector("#modeStatus");
+    const viewTabs = document.querySelectorAll(".view-tab");
+    const careView = document.querySelector("#careView");
+    const opsView = document.querySelector("#opsView");
+    const perspectiveButtons = document.querySelectorAll("[data-perspective]");
+    const opsViewLabel = document.querySelector("#opsViewLabel");
+    const opsTimeline = document.querySelector("#opsTimeline");
+    const opsPendingList = document.querySelector("#opsPendingList");
+    const opsRuleList = document.querySelector("#opsRuleList");
+    const opsConditionList = document.querySelector("#opsConditionList");
     let activeSlot = null;
     let autoExtendPausedUntil = 0;
     let isEditing = false;
     let editBaseline = null;
     let syncInFlight = false;
+    let activeView = "care";
+    let opsPerspective = "morpheus";
 
     function toDate(dateKey) {
       return new Date(`${dateKey}T00:00:00`);
@@ -1080,12 +1510,82 @@
       return `${date.getMonth() + 1}/${date.getDate()}`;
     }
 
+    function formatAmount(value) {
+      return value ? `NT$${Number(value).toLocaleString("zh-TW")}` : "";
+    }
+
     function todayKey() {
       return toKey(new Date());
     }
 
     function compareDateKeys(a, b) {
       return a.localeCompare(b);
+    }
+
+    function nthWeekdayDate(year, monthIndex, nth, weekday) {
+      const date = new Date(year, monthIndex, 1);
+      const offset = (weekday - date.getDay() + 7) % 7;
+      date.setDate(1 + offset + ((nth - 1) * 7));
+      return date.getMonth() === monthIndex ? toKey(date) : "";
+    }
+
+    function generateOpsEvents(startKey, days) {
+      const start = toDate(startKey);
+      const endKey = addDays(startKey, days - 1);
+      const monthKeys = new Set();
+      for (const cursor = new Date(start.getFullYear(), start.getMonth(), 1); toKey(cursor) <= endKey; cursor.setMonth(cursor.getMonth() + 1)) {
+        monthKeys.add(`${cursor.getFullYear()}-${cursor.getMonth()}`);
+      }
+
+      const events = [];
+      opsRules.forEach((rule) => {
+        if (rule.type === "monthlyDay") {
+          monthKeys.forEach((monthKey) => {
+            const [year, monthIndex] = monthKey.split("-").map(Number);
+            events.push({ ...rule, dateKey: toKey(new Date(year, monthIndex, rule.day)) });
+          });
+        }
+
+        if (rule.type === "monthlyNthWeekday") {
+          monthKeys.forEach((monthKey) => {
+            const [year, monthIndex] = monthKey.split("-").map(Number);
+            const dateKey = nthWeekdayDate(year, monthIndex, rule.nth, rule.weekday);
+            if (dateKey) events.push({ ...rule, dateKey });
+          });
+        }
+
+        if (rule.type === "yearlyDate") {
+          const startYear = start.getFullYear();
+          [startYear, startYear + 1].forEach((year) => {
+            events.push({ ...rule, dateKey: toKey(new Date(year, rule.month - 1, rule.day)) });
+          });
+        }
+      });
+
+      return events
+        .filter((event) => compareDateKeys(event.dateKey, startKey) >= 0 && compareDateKeys(event.dateKey, endKey) <= 0)
+        .sort((a, b) => compareDateKeys(a.dateKey, b.dateKey));
+    }
+
+    function opsRuleLabel(rule) {
+      if (rule.type === "monthlyDay") return `每月 ${rule.day} 日`;
+      if (rule.type === "monthlyNthWeekday") return `每月第 ${rule.nth} 個週${weekdayLabels[rule.weekday].replace("週", "")}`;
+      if (rule.type === "yearlyDate") return `每年 ${String(rule.month).padStart(2, "0")}/${String(rule.day).padStart(2, "0")}`;
+      return "條件觸發";
+    }
+
+    function opsEventVisibleTo(event) {
+      if (opsPerspective === "morpheus") return event.owner === "morpheus" || event.owner === "both";
+      return event.owner === "lisa" || event.owner === "both" || event.recipient === "lisa";
+    }
+
+    function switchView(view) {
+      activeView = view;
+      document.body.dataset.view = view;
+      careView.classList.toggle("active", view === "care");
+      opsView.classList.toggle("active", view === "ops");
+      viewTabs.forEach((button) => button.setAttribute("aria-selected", String(button.dataset.view === view)));
+      if (view === "ops") renderOps();
     }
 
     function upgradeKnownRuleText(text) {
@@ -1504,6 +2004,7 @@
       renderTimeRules();
       renderBoard();
       renderSummary();
+      renderOps();
       updateHistoryButtons();
       togglePastButton.textContent = state.showPast ? "隱藏過去" : "顯示過去";
     }
@@ -1563,13 +2064,16 @@
         return;
       }
       board.style.gridTemplateColumns = `112px repeat(${state.visibleDays}, 118px)`;
+      board.style.gridTemplateRows = "68px repeat(3, 118px) 96px";
       const weekdaySlots = modules[state.activeModule].weekdaySlots;
+      const dates = getWeekDates();
+      const opsEvents = generateOpsEvents(visibleStartDate(), state.visibleDays);
       const corner = document.createElement("div");
       corner.className = "board-corner";
       corner.textContent = "類別";
       board.appendChild(corner);
 
-      getWeekDates().forEach((dateKey, index) => {
+      dates.forEach((dateKey, index) => {
         const date = toDate(dateKey);
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
         const header = document.createElement("header");
@@ -1595,7 +2099,14 @@
         board.appendChild(label);
       });
 
-      getWeekDates().forEach((dateKey, dayIndex) => {
+      const opsLabel = document.createElement("div");
+      opsLabel.className = "ops-row-label";
+      opsLabel.style.gridColumn = "1";
+      opsLabel.style.gridRow = "5";
+      opsLabel.innerHTML = "<strong>今日事務</strong>";
+      board.appendChild(opsLabel);
+
+      dates.forEach((dateKey, dayIndex) => {
         const date = toDate(dateKey);
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
         const column = String(dayIndex + 2);
@@ -1616,13 +2127,28 @@
           board.appendChild(slotEl);
         });
       });
+
+      dates.forEach((dateKey, dayIndex) => {
+        const opsCell = document.createElement("div");
+        opsCell.className = "ops-day-cell";
+        opsCell.style.gridColumn = String(dayIndex + 2);
+        opsCell.style.gridRow = "5";
+        opsCell.innerHTML = opsEvents
+          .filter((event) => event.dateKey === dateKey)
+          .map(renderOpsDayChip)
+          .join("");
+        board.appendChild(opsCell);
+      });
     }
 
     function renderMobileBoard() {
       board.className = "week-board mobile-board";
       board.style.gridTemplateColumns = "";
+      board.style.gridTemplateRows = "";
+      const dates = getWeekDates();
+      const opsEvents = generateOpsEvents(visibleStartDate(), state.visibleDays);
 
-      getWeekDates().forEach((dateKey) => {
+      dates.forEach((dateKey) => {
         const date = toDate(dateKey);
         const dayEl = document.createElement("article");
         dayEl.className = "mobile-day";
@@ -1645,8 +2171,27 @@
           dayEl.appendChild(row);
         });
 
+        const opsRow = document.createElement("div");
+        opsRow.className = "mobile-slot-row ops-mobile-row";
+        const opsLabel = document.createElement("div");
+        opsLabel.className = "mobile-slot-label";
+        opsLabel.innerHTML = "<strong>今日事務</strong>";
+        const opsList = document.createElement("div");
+        opsList.className = "mobile-ops-list";
+        opsList.innerHTML = opsEvents
+          .filter((event) => event.dateKey === dateKey)
+          .map(renderOpsDayChip)
+          .join("");
+        opsRow.append(opsLabel, opsList);
+        dayEl.appendChild(opsRow);
+
         board.appendChild(dayEl);
       });
+    }
+
+    function renderOpsDayChip(event) {
+      const amount = event.amount ? ` ${formatAmount(event.amount)}` : "";
+      return `<div class="ops-day-chip"><span>${event.icon}</span><span>${escapeHtml(event.action)}${escapeHtml(amount)}</span></div>`;
     }
 
     function renderSlot(dateKey, slot) {
@@ -1790,6 +2335,78 @@
         : `<div class="empty-state">本週尚未安排</div>`;
     }
 
+    function renderOps() {
+      const startKey = todayKey();
+      const events = generateOpsEvents(startKey, 30).filter(opsEventVisibleTo);
+      opsViewLabel.textContent = opsPerspective === "morpheus" ? "你要主動處理" : "你會收到 / 需要知道";
+
+      opsTimeline.innerHTML = events.length
+        ? events.map((event) => {
+          const dayDiff = Math.round((toDate(event.dateKey) - toDate(startKey)) / 86400000);
+          const status = dayDiff === 0 ? "今天" : dayDiff <= 7 ? "7 日內" : "未來";
+          const statusClass = dayDiff === 0 ? "today" : dayDiff <= 7 ? "soon" : "";
+          const amount = event.amount ? ` ${formatAmount(event.amount)}` : "";
+          return `
+            <div class="ops-event">
+              <time>${formatDate(event.dateKey)}<span>${weekdayLabels[toDate(event.dateKey).getDay()]}</span></time>
+              <div class="ops-icon">${event.icon}</div>
+              <div class="ops-event-main">
+                <strong>${escapeHtml(event.action)}${escapeHtml(amount)}</strong>
+                <span>${escapeHtml(event.detail || opsRuleLabel(event))}</span>
+              </div>
+              <div class="ops-status ${statusClass}">${status}</div>
+            </div>
+          `;
+        }).join("")
+        : `<div class="empty-state">未來 30 天沒有共同事務</div>`;
+
+      opsPendingList.innerHTML = opsPendingItems
+        .filter((item) => {
+          if (opsPerspective === "morpheus") return item.owner === "morpheus" || item.owner === "both";
+          return item.owner === "lisa" || item.owner === "both";
+        })
+        .map((item) => `
+          <div class="ops-rule pending">
+            <div><strong>${item.icon} ${escapeHtml(item.title)}</strong><span>${escapeHtml(item.detail)}</span></div>
+            <span class="ops-pill">待討論</span>
+          </div>
+        `).join("");
+
+      opsRuleList.innerHTML = opsRules.map((rule) => {
+        const amount = rule.amount ? `，${formatAmount(rule.amount)}` : "";
+        return `
+          <div class="ops-rule">
+            <div><strong>${rule.icon} ${escapeHtml(opsRuleLabel(rule))}</strong><span>${escapeHtml(rule.action)}${escapeHtml(amount)}</span></div>
+            <span class="ops-pill">編輯</span>
+          </div>
+        `;
+      }).join("");
+
+      opsConditionList.innerHTML = opsConditionRules.map((text) => `
+        <div class="ops-rule">
+          <div><strong>🔔 ${escapeHtml(text)}</strong><span>只做提醒與速查，不排進日曆。</span></div>
+        </div>
+      `).join("");
+    }
+
+    function opsSummary(event) {
+      return `${event.icon} ${event.action}${event.amount ? ` ${formatAmount(event.amount)}` : ""}`;
+    }
+
+    function opsDescription(event) {
+      return [event.detail || opsRuleLabel(event), event.recipient === "lisa" ? "Lisa 視角：應收款 / 需知道" : ""]
+        .filter(Boolean)
+        .join("\n");
+    }
+
+    function escapeIcsText(value) {
+      return String(value)
+        .replaceAll("\\", "\\\\")
+        .replaceAll(";", "\\;")
+        .replaceAll(",", "\\,")
+        .replaceAll("\n", "\\n");
+    }
+
     function buildIcs() {
       const lines = [
         "BEGIN:VCALENDAR",
@@ -1820,6 +2437,17 @@
           }
           lines.push("END:VEVENT");
         });
+      });
+
+      generateOpsEvents(todayKey(), 365).forEach((event) => {
+        const compactDate = event.dateKey.replaceAll("-", "");
+        lines.push("BEGIN:VEVENT");
+        lines.push(`UID:ops-${event.dateKey}-${event.id}@family-ops`);
+        lines.push(`SUMMARY:${escapeIcsText(opsSummary(event))}`);
+        lines.push(`DESCRIPTION:${escapeIcsText(opsDescription(event))}`);
+        lines.push(`DTSTART;VALUE=DATE:${compactDate}`);
+        lines.push(`DTEND;VALUE=DATE:${addDays(event.dateKey, 1).replaceAll("-", "")}`);
+        lines.push("END:VEVENT");
       });
 
       lines.push("END:VCALENDAR");
@@ -1860,6 +2488,19 @@
             event.endTime = slot.calendarTime[1];
           }
           events.push(event);
+        });
+      });
+      generateOpsEvents(todayKey(), 365).forEach((event) => {
+        events.push({
+          date: event.dateKey,
+          slotId: `ops_${event.id}`,
+          slotLabel: "共同事務",
+          personId: "ops",
+          personLabel: "共同事務",
+          summary: opsSummary(event),
+          note: opsDescription(event),
+          timeRule: event.detail || opsRuleLabel(event),
+          allDay: true
         });
       });
       return events;
@@ -1924,6 +2565,16 @@
     cancelEditButton.addEventListener("click", cancelEditMode);
     undoButton.addEventListener("click", undo);
     redoButton.addEventListener("click", redo);
+    viewTabs.forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.view));
+    });
+    perspectiveButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        opsPerspective = button.dataset.perspective;
+        perspectiveButtons.forEach((item) => item.classList.toggle("active", item === button));
+        renderOps();
+      });
+    });
     document.querySelector("#prevWeek").addEventListener("click", () => {
       pauseAutoExtend();
       const nextStart = addDays(visibleStartDate(), -7);
@@ -1996,6 +2647,7 @@
     });
 
     loadState();
+    switchView("care");
     render();
   </script>
 </body>
