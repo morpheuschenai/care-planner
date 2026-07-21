@@ -484,24 +484,34 @@
 
     .ops-day-chip {
       display: grid;
-      grid-template-columns: 22px minmax(0, 1fr);
-      gap: 6px;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 5px;
       align-items: start;
-      padding: 7px 8px;
+      padding: 6px 7px;
       color: #433722;
       background: rgba(246, 237, 204, .72);
       border: 1px solid rgba(198, 161, 91, .24);
       border-radius: var(--radius);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
-      line-height: 1.28;
+      line-height: 1.2;
     }
 
     .ops-day-chip span:last-child {
       min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    }
+
+    .ops-day-chip strong,
+    .ops-day-chip em {
+      display: block;
+      overflow-wrap: anywhere;
+      font-style: normal;
+    }
+
+    .ops-day-chip em {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10px;
     }
 
     .ops-day-more {
@@ -1192,6 +1202,11 @@
         padding: 6px;
       }
 
+      .mobile-ops-list .ops-day-chip {
+        grid-template-columns: 20px minmax(0, 1fr);
+        font-size: 12px;
+      }
+
       .mobile-ops-list:empty::before {
         content: "今天沒有共同事務";
         display: block;
@@ -1229,6 +1244,42 @@
       .ops-status {
         grid-column: 3;
         width: fit-content;
+      }
+
+      .slot-popover.open {
+        left: 10px !important;
+        right: 10px;
+        bottom: 10px;
+        top: auto !important;
+        width: auto;
+        max-height: min(78vh, 560px);
+        overflow-y: auto;
+        padding: 14px;
+        border-radius: 12px;
+      }
+
+      .slot-popover.open::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: rgba(36, 33, 29, .24);
+      }
+
+      .person-menu {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .note-field textarea {
+        min-height: 104px;
+        max-height: 28vh;
+      }
+
+      .note-save {
+        position: sticky;
+        bottom: -1px;
+        min-height: 42px;
+        box-shadow: 0 -8px 16px rgba(255, 250, 240, .88);
       }
 
       .mobile-slot-row .slot.all-day .assignment-chip,
@@ -2200,8 +2251,22 @@
     }
 
     function renderOpsDayChip(event) {
-      const amount = event.amount ? ` ${formatAmount(event.amount)}` : "";
-      return `<div class="ops-day-chip"><span>${event.icon}</span><span>${escapeHtml(event.action)}${escapeHtml(amount)}</span></div>`;
+      const amount = event.amount ? formatAmount(event.amount) : "";
+      return `
+        <div class="ops-day-chip" title="${escapeHtml(opsSummary(event))}">
+          <span>${event.icon}</span>
+          <span><strong>${escapeHtml(compactOpsLabel(event))}</strong>${amount ? `<em>${escapeHtml(amount)}</em>` : ""}</span>
+        </div>
+      `;
+    }
+
+    function compactOpsLabel(event) {
+      if (event.id === "lisa-richart") return "Lisa";
+      if (event.id === "roy-invest") return "Roy 投資";
+      if (event.action.includes("保單")) return event.action.replace("扣款", "");
+      if (event.action.includes("生日")) return event.action;
+      if (event.action.includes("報稅")) return "報稅";
+      return event.action.replace(/^匯\s*/, "");
     }
 
     function renderSlot(dateKey, slot) {
@@ -2303,11 +2368,16 @@
         closePopover();
       });
 
-      const rect = slotEl.getBoundingClientRect();
-      const left = Math.min(Math.max(14, rect.left), window.innerWidth - 334);
-      const top = Math.min(rect.bottom + 8, window.innerHeight - 300);
-      popover.style.left = `${left}px`;
-      popover.style.top = `${Math.max(14, top)}px`;
+      if (window.matchMedia(MOBILE_QUERY).matches) {
+        popover.style.left = "";
+        popover.style.top = "";
+      } else {
+        const rect = slotEl.getBoundingClientRect();
+        const left = Math.min(Math.max(14, rect.left), window.innerWidth - 334);
+        const top = Math.min(rect.bottom + 8, window.innerHeight - 300);
+        popover.style.left = `${left}px`;
+        popover.style.top = `${Math.max(14, top)}px`;
+      }
       popover.classList.add("open");
     }
 
