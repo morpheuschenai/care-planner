@@ -499,6 +499,16 @@
 
     .ops-day-chip span:last-child {
       min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ops-day-more {
+      padding: 4px 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
     }
 
     .slot.drag-over {
@@ -1410,8 +1420,6 @@
     const opsRules = [
       { id: "lisa-richart", type: "monthlyDay", day: 10, icon: "💰", action: "匯 Lisa 台新 Richart", amount: 46200, owner: "morpheus", recipient: "lisa" },
       { id: "roy-invest", type: "monthlyDay", day: 10, icon: "💰", action: "匯 Roy 名下帳戶", amount: 3000, owner: "morpheus", recipient: "roy" },
-      { id: "visit-2", type: "monthlyNthWeekday", nth: 2, weekday: 5, icon: "👶", action: "探視接送", detail: "每月第 2 個週五開始，連續 4 天 3 夜", owner: "both" },
-      { id: "visit-4", type: "monthlyNthWeekday", nth: 4, weekday: 5, icon: "👶", action: "探視接送", detail: "每月第 4 個週五開始，連續 4 天 3 夜", owner: "both" },
       { id: "eason-birthday", type: "yearlyDate", month: 8, day: 22, icon: "🎂", action: "Eason 生日", owner: "both" },
       { id: "roy-policy-aug", type: "yearlyDate", month: 8, day: 26, icon: "🏥", action: "Roy 保單扣款", detail: "南山 U012119361 + U012119370", amount: 20627, owner: "morpheus" },
       { id: "eason-policy", type: "yearlyDate", month: 9, day: 2, icon: "🏥", action: "Eason 保單扣款", detail: "南山 U020553906 + U020553919 + U020553922", amount: 46971, owner: "morpheus" },
@@ -2133,10 +2141,7 @@
         opsCell.className = "ops-day-cell";
         opsCell.style.gridColumn = String(dayIndex + 2);
         opsCell.style.gridRow = "5";
-        opsCell.innerHTML = opsEvents
-          .filter((event) => event.dateKey === dateKey)
-          .map(renderOpsDayChip)
-          .join("");
+        opsCell.innerHTML = renderOpsDayChips(opsEvents.filter((event) => event.dateKey === dateKey));
         board.appendChild(opsCell);
       });
     }
@@ -2178,15 +2183,20 @@
         opsLabel.innerHTML = "<strong>今日事務</strong>";
         const opsList = document.createElement("div");
         opsList.className = "mobile-ops-list";
-        opsList.innerHTML = opsEvents
-          .filter((event) => event.dateKey === dateKey)
-          .map(renderOpsDayChip)
-          .join("");
+        opsList.innerHTML = renderOpsDayChips(opsEvents.filter((event) => event.dateKey === dateKey));
         opsRow.append(opsLabel, opsList);
         dayEl.appendChild(opsRow);
 
         board.appendChild(dayEl);
       });
+    }
+
+    function renderOpsDayChips(events) {
+      const visible = events.slice(0, 2).map(renderOpsDayChip).join("");
+      const hiddenCount = events.length - 2;
+      return hiddenCount > 0
+        ? `${visible}<div class="ops-day-more">＋${hiddenCount} 筆共同事務</div>`
+        : visible;
     }
 
     function renderOpsDayChip(event) {
