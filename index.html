@@ -2060,10 +2060,10 @@
       timeRuleSlots().forEach((slot) => {
         const remaining = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id)
           .filter((rule) => !(rule.start === group.start && rule.end === group.end));
-        if (updates[slot.id]) {
-          remaining.push({ start: nextStart, end: nextEnd, text: updates[slot.id] });
-        }
-        state.timeRules[slot.id] = remaining.length ? remaining : structuredClone(defaultTimeRules[slot.id] || []);
+        const hasUpdate = Object.prototype.hasOwnProperty.call(updates, slot.id);
+        const nextText = hasUpdate ? updates[slot.id] : group.rules[slot.id];
+        remaining.push({ start: nextStart, end: nextEnd, text: nextText || "待確認" });
+        state.timeRules[slot.id] = remaining;
       });
       render();
       showToast("已更新日期區間");
