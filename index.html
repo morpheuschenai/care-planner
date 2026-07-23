@@ -1062,6 +1062,160 @@
       border-color: var(--ink);
     }
 
+    .time-rule-dialog {
+      position: fixed;
+      z-index: 24;
+      left: 50%;
+      top: 50%;
+      display: none;
+      width: min(560px, calc(100vw - 32px));
+      max-height: min(760px, calc(100vh - 32px));
+      overflow-y: auto;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      transform: translate(-50%, -50%);
+    }
+
+    .time-rule-dialog.open {
+      display: block;
+    }
+
+    .time-rule-dialog.open::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: rgba(36, 33, 29, .18);
+    }
+
+    .time-rule-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .time-rule-form-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .time-rule-form-head strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .time-rule-form-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .date-range-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .form-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .form-field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .form-field input,
+    .child-schedule-row select,
+    .child-schedule-row input {
+      min-height: 38px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .62);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .schedule-section {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(255, 255, 255, .36);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    #timeRuleQuestionnaire {
+      display: grid;
+      gap: 10px;
+    }
+
+    .schedule-section h3 {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .schedule-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .schedule-section-head select,
+    .custom-schedule-text {
+      min-height: 36px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .62);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .custom-schedule-text {
+      width: 100%;
+      min-height: 78px;
+      resize: vertical;
+      font: inherit;
+    }
+
+    .child-schedule-row {
+      display: grid;
+      grid-template-columns: 56px 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .child-schedule-row strong {
+      font-size: 13px;
+    }
+
+    .time-rule-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .time-rule-actions button {
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .52);
+      font-weight: 800;
+    }
+
+    .time-rule-actions .primary {
+      color: #fff;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
     .icon-button:disabled {
       opacity: .42;
       cursor: not-allowed;
@@ -1296,6 +1450,28 @@
         box-shadow: 0 -8px 16px rgba(255, 250, 240, .88);
       }
 
+      .time-rule-dialog.open {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        top: auto;
+        width: auto;
+        max-height: min(82vh, 620px);
+        transform: none;
+      }
+
+      .date-range-fields,
+      .child-schedule-row {
+        grid-template-columns: 1fr;
+      }
+
+      .time-rule-actions {
+        position: sticky;
+        bottom: -1px;
+        padding-top: 8px;
+        background: var(--panel);
+      }
+
       .mobile-slot-row .slot.all-day .assignment-chip,
       .mobile-slot-row .slot.all-day .empty-state {
         min-height: 46px;
@@ -1426,6 +1602,33 @@
     </div>
   </div>
 
+  <div class="time-rule-dialog" id="timeRuleDialog" role="dialog" aria-modal="true" aria-label="編輯日期區間卡">
+    <div class="time-rule-form">
+      <div class="time-rule-form-head">
+        <div>
+          <strong>編輯日期區間卡</strong>
+          <span>選日期、孩子狀態與時間。未填時間會存成待確認。</span>
+        </div>
+        <button class="popover-close" id="closeTimeRuleDialog" type="button" aria-label="關閉">×</button>
+      </div>
+      <div class="date-range-fields">
+        <div class="form-field">
+          <label for="timeRuleStart">開始日期</label>
+          <input id="timeRuleStart" type="date" />
+        </div>
+        <div class="form-field">
+          <label for="timeRuleEnd">結束日期</label>
+          <input id="timeRuleEnd" type="date" />
+        </div>
+      </div>
+      <div id="timeRuleQuestionnaire"></div>
+      <div class="time-rule-actions">
+        <button id="cancelTimeRuleEdit" type="button">取消</button>
+        <button class="primary" id="saveTimeRuleEdit" type="button">確認</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const STORAGE_KEY = "family-ops-care-module-v2";
     const STORAGE_BACKUP_KEY = "family-ops-care-module-v2-backups";
@@ -1442,6 +1645,11 @@
       lisa: { id: "lisa", label: "Lisa" },
       both: { id: "both", label: "Mo / Lisa" }
     };
+
+    const careChildren = [
+      { id: "zhenzhen", label: "真真" },
+      { id: "lele", label: "樂樂" }
+    ];
 
     const modules = {
       childcare: {
@@ -1570,7 +1778,12 @@
     const opsPendingList = document.querySelector("#opsPendingList");
     const opsRuleList = document.querySelector("#opsRuleList");
     const opsConditionList = document.querySelector("#opsConditionList");
+    const timeRuleDialog = document.querySelector("#timeRuleDialog");
+    const timeRuleStartInput = document.querySelector("#timeRuleStart");
+    const timeRuleEndInput = document.querySelector("#timeRuleEnd");
+    const timeRuleQuestionnaire = document.querySelector("#timeRuleQuestionnaire");
     let activeSlot = null;
+    let activeTimeRuleGroup = null;
     let autoExtendPausedUntil = 0;
     let isEditing = false;
     let editBaseline = null;
@@ -1801,6 +2014,7 @@
       history.redo = [];
       isEditing = true;
       closePopover();
+      closeTimeRuleDialog();
       render();
       showToast("已進入編輯模式");
     }
@@ -1812,6 +2026,7 @@
       history.redo = [];
       isEditing = false;
       closePopover();
+      closeTimeRuleDialog();
       render();
       showToast("已儲存");
     }
@@ -1824,6 +2039,7 @@
       history.redo = [];
       isEditing = false;
       closePopover();
+      closeTimeRuleDialog();
       render();
       showToast("已取消編輯");
     }
@@ -1880,6 +2096,7 @@
       state.showPast = Boolean(nextState.showPast);
       state.visibleDays = Math.max(INITIAL_VISIBLE_DAYS, Number(nextState.visibleDays) || INITIAL_VISIBLE_DAYS);
       closePopover();
+      closeTimeRuleDialog();
       render();
     }
 
@@ -2091,41 +2308,133 @@
       });
     }
 
+    function parseChildSchedule(text) {
+      const result = Object.fromEntries(careChildren.map((child) => [child.id, { status: "pending", time: "" }]));
+      careChildren.forEach((child) => {
+        const pattern = new RegExp(`${child.label}\\s*(休假|待確認|[0-2]?\\d:[0-5]\\d)?`);
+        const match = String(text || "").match(pattern);
+        if (!match) return;
+        const value = match[1] || "";
+        if (value === "休假") {
+          result[child.id] = { status: "off", time: "" };
+        } else if (value === "待確認" || !value) {
+          result[child.id] = { status: "pending", time: "" };
+        } else {
+          result[child.id] = { status: "time", time: value.padStart(5, "0") };
+        }
+      });
+      return result;
+    }
+
+    function isSimpleScheduleText(text) {
+      const value = String(text || "").trim();
+      if (!value || value === "待確認") return true;
+      return value
+        .split(/\s*[\/；]\s*/)
+        .filter(Boolean)
+        .every((part) => careChildren.some((child) => {
+          const pattern = new RegExp(`^${child.label}\\s*(休假|待確認|[0-2]?\\d:[0-5]\\d)$`);
+          return pattern.test(part.trim());
+        }));
+    }
+
+    function renderTimeRuleQuestionnaire(group) {
+      timeRuleStartInput.value = group.start || todayKey();
+      timeRuleEndInput.value = group.end || "";
+      timeRuleQuestionnaire.innerHTML = timeRuleSlots().map((slot) => {
+        const originalText = group.rules[slot.id] || "";
+        const simple = isSimpleScheduleText(originalText);
+        const schedule = parseChildSchedule(originalText);
+        const rows = careChildren.map((child) => `
+          <div class="child-schedule-row">
+            <strong>${child.label}</strong>
+            <select data-slot="${slot.id}" data-child="${child.id}" data-field="status">
+              <option value="pending"${schedule[child.id].status === "pending" ? " selected" : ""}>待確認</option>
+              <option value="time"${schedule[child.id].status === "time" ? " selected" : ""}>時間</option>
+              <option value="off"${schedule[child.id].status === "off" ? " selected" : ""}>休假</option>
+            </select>
+            <input data-slot="${slot.id}" data-child="${child.id}" data-field="time" type="time" value="${schedule[child.id].time}" ${schedule[child.id].status === "time" ? "" : "disabled"} />
+          </div>
+        `).join("");
+        return `
+          <section class="schedule-section">
+            <div class="schedule-section-head">
+              <h3>${slot.label}</h3>
+              <select data-slot="${slot.id}" data-field="mode">
+                <option value="form"${simple ? " selected" : ""}>問卷</option>
+                <option value="custom"${simple ? "" : " selected"}>自訂文字</option>
+              </select>
+            </div>
+            <div data-slot="${slot.id}" data-field="formRows" ${simple ? "" : "hidden"}>${rows}</div>
+            <textarea class="custom-schedule-text" data-slot="${slot.id}" data-field="custom" ${simple ? "hidden" : ""}>${escapeHtml(originalText)}</textarea>
+          </section>
+        `;
+      }).join("");
+
+      timeRuleQuestionnaire.querySelectorAll('select[data-field="mode"]').forEach((select) => {
+        select.addEventListener("change", () => {
+          const rows = timeRuleQuestionnaire.querySelector(`[data-slot="${select.dataset.slot}"][data-field="formRows"]`);
+          const custom = timeRuleQuestionnaire.querySelector(`textarea[data-slot="${select.dataset.slot}"][data-field="custom"]`);
+          rows.hidden = select.value !== "form";
+          custom.hidden = select.value !== "custom";
+        });
+      });
+
+      timeRuleQuestionnaire.querySelectorAll('select[data-field="status"]').forEach((select) => {
+        select.addEventListener("change", () => {
+          const timeInput = timeRuleQuestionnaire.querySelector(`input[data-slot="${select.dataset.slot}"][data-child="${select.dataset.child}"]`);
+          timeInput.disabled = select.value !== "time";
+          if (select.value !== "time") timeInput.value = "";
+        });
+      });
+    }
+
+    function formatScheduleFromForm(slotId) {
+      const mode = timeRuleQuestionnaire.querySelector(`select[data-slot="${slotId}"][data-field="mode"]`)?.value || "form";
+      if (mode === "custom") {
+        return timeRuleQuestionnaire.querySelector(`textarea[data-slot="${slotId}"][data-field="custom"]`)?.value.trim() || "待確認";
+      }
+      const statuses = careChildren.map((child) =>
+        timeRuleQuestionnaire.querySelector(`select[data-slot="${slotId}"][data-child="${child.id}"]`)?.value || "pending"
+      );
+      if (statuses.every((status) => status === "pending")) return "待確認";
+      const parts = careChildren.map((child) => {
+        const status = timeRuleQuestionnaire.querySelector(`select[data-slot="${slotId}"][data-child="${child.id}"]`)?.value || "pending";
+        const time = timeRuleQuestionnaire.querySelector(`input[data-slot="${slotId}"][data-child="${child.id}"]`)?.value || "";
+        if (status === "time" && time) return `${child.label} ${time}`;
+        if (status === "off") return `${child.label}休假`;
+        if (status === "pending") return `${child.label}待確認`;
+        return "";
+      }).filter(Boolean);
+      return parts.length ? parts.join(" / ") : "待確認";
+    }
+
     function editTimeRuleGroup(group) {
       if (!requireEditing()) return;
-      const current = [
-        `期間｜${group.start || ""}~${group.end || ""}`,
-        ...timeRuleSlots().map((slot) => `${slot.label}｜${group.rules[slot.id] || ""}`)
-      ].join("\n");
-      const next = prompt(
-        `編輯日期區間卡\n格式：期間｜開始日期~結束日期\n每個項目一行，例如：\n早上送託｜真真 7:30 / 樂樂 8:00\n放學接回｜真真 15:30；樂樂 週一 14:00 / 週二 15:00 / 週三 18:00`,
-        current
-      );
-      if (next === null) return;
-      const updates = {};
-      let nextStart = group.start || todayKey();
-      let nextEnd = group.end || "";
+      activeTimeRuleGroup = group;
+      renderTimeRuleQuestionnaire(group);
+      timeRuleDialog.classList.add("open");
+    }
 
-      parseTimeRuleInput(next).forEach(({ label, value }) => {
-        if (label === "期間") {
-          const [start = "", end = ""] = value.split("~").map((part) => part.trim().split(/\s+/)[0]);
-          nextStart = normalizeRuleDateInput(start, toDate(group.start || todayKey()).getFullYear()) || todayKey();
-          nextEnd = normalizeRuleDateInput(end, toDate(nextStart).getFullYear());
-          return;
-        }
-        const slot = timeRuleSlots().find((item) => item.label === label);
-        if (slot) updates[slot.id] = value;
-      });
+    function closeTimeRuleDialog() {
+      timeRuleDialog.classList.remove("open");
+      activeTimeRuleGroup = null;
+    }
+
+    function saveTimeRuleDialog() {
+      if (!activeTimeRuleGroup || !requireEditing()) return;
+      const group = activeTimeRuleGroup;
+      const nextStart = normalizeRuleDateInput(timeRuleStartInput.value, toDate(group.start || todayKey()).getFullYear()) || todayKey();
+      const nextEnd = normalizeRuleDateInput(timeRuleEndInput.value, toDate(nextStart).getFullYear());
 
       commitHistory();
       timeRuleSlots().forEach((slot) => {
         const remaining = normalizeTimeRuleSet(state.timeRules[slot.id], slot.id)
           .filter((rule) => !(rule.start === group.start && rule.end === group.end));
-        const hasUpdate = Object.prototype.hasOwnProperty.call(updates, slot.id);
-        const nextText = hasUpdate ? updates[slot.id] : group.rules[slot.id];
-        remaining.push({ start: nextStart, end: nextEnd, text: nextText || "待確認" });
+        remaining.push({ start: nextStart, end: nextEnd, text: formatScheduleFromForm(slot.id) });
         state.timeRules[slot.id] = remaining;
       });
+      closeTimeRuleDialog();
       render();
       showToast("已更新日期區間");
     }
@@ -2755,6 +3064,9 @@
     document.querySelector("#downloadIcs").addEventListener("click", downloadIcs);
     syncButton.addEventListener("click", syncToCalendar);
     document.querySelector("#closePopover").addEventListener("click", closePopover);
+    document.querySelector("#closeTimeRuleDialog").addEventListener("click", closeTimeRuleDialog);
+    document.querySelector("#cancelTimeRuleEdit").addEventListener("click", closeTimeRuleDialog);
+    document.querySelector("#saveTimeRuleEdit").addEventListener("click", saveTimeRuleDialog);
     document.querySelector("#saveNote").addEventListener("click", () => {
       if (!activeSlot) return;
       saveNote(activeSlot.dateKey, activeSlot.slotId, noteInput.value);
@@ -2768,6 +3080,11 @@
     });
 
     document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closePopover();
+        closeTimeRuleDialog();
+        return;
+      }
       const modifier = event.metaKey || event.ctrlKey;
       if (!modifier || !isEditing) return;
       const key = event.key.toLowerCase();
