@@ -2066,6 +2066,31 @@
       showToast("已新增日期區間");
     }
 
+    function normalizeRuleDateInput(value, fallbackYear) {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      const full = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (full) return `${full[1]}-${full[2].padStart(2, "0")}-${full[3].padStart(2, "0")}`;
+      const short = text.match(/^(\d{1,2})-(\d{1,2})$/);
+      if (short) return `${fallbackYear}-${short[1].padStart(2, "0")}-${short[2].padStart(2, "0")}`;
+      return text;
+    }
+
+    function parseTimeRuleInput(input) {
+      const labels = ["期間", ...timeRuleSlots().map((slot) => slot.label)];
+      const pattern = new RegExp(`(?:^|\\s+)(${labels.join("|")})｜`, "g");
+      const matches = [...input.matchAll(pattern)];
+      if (!matches.length) return [];
+      return matches.map((match, index) => {
+        const start = match.index + match[0].length;
+        const end = matches[index + 1]?.index ?? input.length;
+        return {
+          label: match[1],
+          value: input.slice(start, end).trim()
+        };
+      });
+    }
+
     function editTimeRuleGroup(group) {
       if (!requireEditing()) return;
       const current = [
@@ -2081,17 +2106,14 @@
       let nextStart = group.start || todayKey();
       let nextEnd = group.end || "";
 
-      next.split("\n").forEach((line) => {
-        if (!line.trim() || !line.includes("｜")) return;
-        const [label = "", ...valueParts] = line.split("｜");
-        const value = valueParts.join("｜").trim();
-        if (label.trim() === "期間") {
-          const [start = "", end = ""] = value.split("~").map((part) => part.trim());
-          nextStart = start || todayKey();
-          nextEnd = end || "";
+      parseTimeRuleInput(next).forEach(({ label, value }) => {
+        if (label === "期間") {
+          const [start = "", end = ""] = value.split("~").map((part) => part.trim().split(/\s+/)[0]);
+          nextStart = normalizeRuleDateInput(start, toDate(group.start || todayKey()).getFullYear()) || todayKey();
+          nextEnd = normalizeRuleDateInput(end, toDate(nextStart).getFullYear());
           return;
         }
-        const slot = timeRuleSlots().find((item) => item.label === label.trim());
+        const slot = timeRuleSlots().find((item) => item.label === label);
         if (slot) updates[slot.id] = value;
       });
 
