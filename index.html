@@ -160,7 +160,8 @@
       display: block;
     }
 
-    body[data-view="ops"] .actions {
+    body[data-view="ops"] .actions,
+    body[data-view="school"] .actions {
       display: none;
     }
 
@@ -920,6 +921,144 @@
       border: 1px solid var(--ink);
     }
 
+    .school-page {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .school-panel {
+      padding: 16px;
+      background: rgba(255, 250, 240, .82);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 24px rgba(63, 49, 30, .08);
+    }
+
+    .school-panel + .school-panel {
+      margin-top: 12px;
+    }
+
+    .school-panel h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .school-note {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .profile-grid,
+    .contact-grid,
+    .link-list,
+    .meal-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .profile-item,
+    .contact-item,
+    .meal-item,
+    .school-link {
+      display: grid;
+      grid-template-columns: 98px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 44px;
+      padding: 10px;
+      background: rgba(255, 255, 255, .48);
+      border: 1px solid rgba(216, 205, 185, .74);
+      border-radius: var(--radius);
+    }
+
+    .profile-item span,
+    .contact-item span,
+    .meal-item span,
+    .school-link span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .profile-item strong,
+    .contact-item strong,
+    .meal-item strong,
+    .school-link strong {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .school-table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(216, 205, 185, .74);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .34);
+    }
+
+    .school-table {
+      width: 100%;
+      min-width: 520px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .school-table th,
+    .school-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(216, 205, 185, .74);
+      text-align: left;
+    }
+
+    .school-table th {
+      color: var(--muted);
+      background: rgba(255, 250, 240, .8);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .school-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .school-time {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      color: #113d39;
+      background: var(--mo-soft);
+      border: 1px solid rgba(31, 111, 104, .24);
+      border-radius: 999px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .school-time.late {
+      color: #65311f;
+      background: var(--lisa-soft);
+      border-color: rgba(154, 79, 52, .24);
+    }
+
+    .school-link {
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .school-link.placeholder {
+      color: var(--muted);
+      background: rgba(235, 227, 212, .48);
+      border-style: dashed;
+    }
+
+    .school-link:hover {
+      border-color: var(--accent);
+    }
+
     .toast {
       position: fixed;
       right: 22px;
@@ -1242,7 +1381,8 @@
         justify-content: flex-start;
       }
 
-      body[data-view="ops"] .actions {
+      body[data-view="ops"] .actions,
+      body[data-view="school"] .actions {
         display: none;
       }
 
@@ -1387,6 +1527,18 @@
         gap: 10px;
       }
 
+      .school-page {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .profile-item,
+      .contact-item,
+      .meal-item,
+      .school-link {
+        grid-template-columns: 86px minmax(0, 1fr);
+      }
+
       .ops-head {
         align-items: stretch;
         flex-direction: column;
@@ -1494,10 +1646,11 @@
     <main class="main">
       <header class="topbar">
         <div class="title-block">
-          <h2>照顧分工</h2>
+          <h2 id="pageTitle">照顧分工</h2>
           <nav class="view-tabs" aria-label="工作台切換">
             <button class="view-tab" data-view="care" type="button" aria-selected="true">照顧分工</button>
             <button class="view-tab" data-view="ops" type="button" aria-selected="false">共同事務</button>
+            <button class="view-tab" data-view="school" type="button" aria-selected="false">學校資訊</button>
           </nav>
         </div>
         <div class="actions">
@@ -1578,6 +1731,103 @@
 
             <section class="ops-panel">
               <button class="agreement-button" type="button">完整協議條款速查</button>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="app-view" id="schoolView">
+        <div class="school-page">
+          <div>
+            <section class="school-panel">
+              <h3>樂樂基本資料</h3>
+              <p class="school-note">固定資料集中放在這裡，之後有 Gmail 更新班級、座號或學號時，直接更新同一區。</p>
+              <div class="profile-grid">
+                <div class="profile-item"><span>姓名</span><strong>陳奕樂</strong></div>
+                <div class="profile-item"><span>學校</span><strong>日新國小</strong></div>
+                <div class="profile-item"><span>班級</span><strong>二年五班</strong></div>
+                <div class="profile-item"><span>座號</span><strong>1</strong></div>
+                <div class="profile-item"><span>學號</span><strong>114095</strong></div>
+              </div>
+            </section>
+
+            <section class="school-panel">
+              <h3>每週放學時間</h3>
+              <div class="school-table-wrap">
+                <table class="school-table">
+                  <thead>
+                    <tr>
+                      <th>星期</th>
+                      <th>放學時間</th>
+                      <th>備註</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>週一</td>
+                      <td><span class="school-time">16:00</span></td>
+                      <td>課後班</td>
+                    </tr>
+                    <tr>
+                      <td>週二</td>
+                      <td><span class="school-time">16:00</span></td>
+                      <td>課後班</td>
+                    </tr>
+                    <tr>
+                      <td>週三</td>
+                      <td><span class="school-time late">18:30</span></td>
+                      <td>課後班延長</td>
+                    </tr>
+                    <tr>
+                      <td>週四</td>
+                      <td><span class="school-time">16:00</span></td>
+                      <td>課後班</td>
+                    </tr>
+                    <tr>
+                      <td>週五</td>
+                      <td><span class="school-time">16:00</span></td>
+                      <td>課後班</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <aside>
+            <section class="school-panel">
+              <h3>午餐資訊</h3>
+              <div class="meal-list">
+                <div class="meal-item"><span>訂餐</span><strong>週一至週五皆訂餐</strong></div>
+                <div class="meal-item"><span>餐別</span><strong>葷食</strong></div>
+              </div>
+            </section>
+
+            <section class="school-panel">
+              <h3>聯絡資訊</h3>
+              <div class="contact-grid">
+                <div class="contact-item"><span>學校電話</span><strong>02-2558-4819</strong></div>
+                <div class="contact-item"><span>課後班</span><strong>分機 124</strong></div>
+                <div class="contact-item"><span>午餐</span><strong>分機 211 / 214</strong></div>
+              </div>
+            </section>
+
+            <section class="school-panel">
+              <h3>常用連結</h3>
+              <div class="link-list">
+                <a class="school-link" href="https://lin.ee/1xZBB3n" target="_blank" rel="noopener">
+                  <span>課後班 LINE</span>
+                  <strong>加入或查詢課後班資訊</strong>
+                </a>
+                <div class="school-link placeholder">
+                  <span>校園繳費系統</span>
+                  <strong>預留，收到通知後更新</strong>
+                </div>
+                <a class="school-link" href="https://fatraceschool.k12ea.gov.tw/frontend/search.html?school=363602" target="_blank" rel="noopener">
+                  <span>食材平台</span>
+                  <strong>教育部校園食材登錄平台</strong>
+                </a>
+              </div>
             </section>
           </aside>
         </div>
@@ -1769,9 +2019,11 @@
     const saveButton = document.querySelector("#saveData");
     const cancelEditButton = document.querySelector("#cancelEdit");
     const modeStatus = document.querySelector("#modeStatus");
+    const pageTitle = document.querySelector("#pageTitle");
     const viewTabs = document.querySelectorAll(".view-tab");
     const careView = document.querySelector("#careView");
     const opsView = document.querySelector("#opsView");
+    const schoolView = document.querySelector("#schoolView");
     const perspectiveButtons = document.querySelectorAll("[data-perspective]");
     const opsViewLabel = document.querySelector("#opsViewLabel");
     const opsTimeline = document.querySelector("#opsTimeline");
@@ -1887,7 +2139,9 @@
       document.body.dataset.view = view;
       careView.classList.toggle("active", view === "care");
       opsView.classList.toggle("active", view === "ops");
+      schoolView.classList.toggle("active", view === "school");
       viewTabs.forEach((button) => button.setAttribute("aria-selected", String(button.dataset.view === view)));
+      pageTitle.textContent = view === "ops" ? "共同事務" : view === "school" ? "學校資訊" : "照顧分工";
       if (view === "ops") renderOps();
     }
 
