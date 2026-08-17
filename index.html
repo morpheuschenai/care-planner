@@ -2084,7 +2084,8 @@
 
     const opsRules = [
       { id: "lisa-richart", type: "monthlyDay", day: 1, icon: "💰", action: "匯 Lisa 台新 Richart", amount: 46200, owner: "morpheus", recipient: "lisa" },
-      { id: "roy-invest", type: "monthlyDay", day: 10, icon: "💰", action: "匯 Roy 名下帳戶", amount: 3000, owner: "morpheus", recipient: "roy" },
+      { id: "roy-invest-morpheus", type: "monthlyDay", day: 10, icon: "💰", action: "Morpheus 負責 Roy", detail: "Roy 帳號密碼待恢復", amount: 3000, owner: "morpheus", recipient: "roy" },
+      { id: "eason-invest-lisa", type: "monthlyDay", day: 10, icon: "💰", action: "Lisa 負責 Eason", detail: "活期儲蓄帳號 031-50-0227578", amount: 3000, owner: "lisa", recipient: "eason" },
       { id: "eason-birthday", type: "yearlyDate", month: 8, day: 22, icon: "🎂", action: "Eason 生日", owner: "both" },
       { id: "roy-policy-aug", type: "yearlyDate", month: 8, day: 26, icon: "🏥", action: "Roy 保單扣款", detail: "南山 U012119361 + U012119370", amount: 20627, owner: "morpheus" },
       { id: "eason-policy", type: "yearlyDate", month: 9, day: 2, icon: "🏥", action: "Eason 保單扣款", detail: "南山 U020553906 + U020553919 + U020553922", amount: 46971, owner: "morpheus" },
@@ -2095,6 +2096,7 @@
 
     const opsPendingItems = [
       { icon: "⚠️", title: "Eason 生日陪伴", detail: "生日前 30 日起開始討論", owner: "both" },
+      { icon: "⚠️", title: "Roy 帳號密碼恢復", detail: "確認銀行 / 平台後查詢官方恢復流程", owner: "morpheus" },
       { icon: "⚠️", title: "Roy 帳戶投資標的", detail: "定存 / ETF / 定期定額基金", owner: "morpheus" },
       { icon: "⚠️", title: "秋季開學學校資訊", detail: "每學期開學後 14 日內 Lisa 提供", owner: "lisa" }
     ];
@@ -3025,7 +3027,8 @@
 
     function compactOpsLabel(event) {
       if (event.id === "lisa-richart") return "Lisa";
-      if (event.id === "roy-invest") return "Roy 投資";
+      if (event.id === "roy-invest-morpheus") return "Roy";
+      if (event.id === "eason-invest-lisa") return "Eason";
       if (event.action.includes("保單")) return event.action.replace("扣款", "");
       if (event.action.includes("生日")) return event.action;
       if (event.action.includes("報稅")) return "報稅";
