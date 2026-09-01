@@ -860,28 +860,6 @@
       line-height: 1.35;
     }
 
-    .ops-status {
-      min-width: 54px;
-      padding: 5px 7px;
-      color: var(--muted);
-      background: rgba(116, 107, 94, .1);
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .ops-status.soon {
-      color: #725411;
-      background: rgba(246, 237, 204, .88);
-    }
-
-    .ops-status.today {
-      color: #fff;
-      background: #9a4f34;
-    }
-
     .ops-rule {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -1557,12 +1535,7 @@
       }
 
       .ops-event {
-        grid-template-columns: 56px 30px minmax(0, 1fr);
-      }
-
-      .ops-status {
-        grid-column: 3;
-        width: fit-content;
+        grid-template-columns: 56px 30px minmax(0, 1fr) auto;
       }
 
       .slot-popover.open {
@@ -3249,9 +3222,6 @@
 
       opsTimeline.innerHTML = events.length
         ? events.map((event) => {
-          const dayDiff = Math.round((toDate(event.dateKey) - toDate(startKey)) / 86400000);
-          const status = dayDiff === 0 ? "今天" : dayDiff <= 7 ? "7 日內" : "未來";
-          const statusClass = dayDiff === 0 ? "today" : dayDiff <= 7 ? "soon" : "";
           const amount = event.amount ? ` ${formatAmount(event.amount)}` : "";
           return `
             <div class="ops-event">
@@ -3261,7 +3231,7 @@
                 <strong>${escapeHtml(event.action)}${escapeHtml(amount)}</strong>
                 <span>${escapeHtml(event.detail || opsRuleLabel(event))}</span>
               </div>
-              <div><div class="ops-status ${statusClass}">${status}</div>${ownerTag(event.owner)}</div>
+              ${ownerTag(event.owner)}
             </div>
           `;
         }).join("")
