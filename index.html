@@ -1743,6 +1743,20 @@
             </section>
 
             <section class="ops-panel">
+              <h3>投資帳戶與每月匯款</h3>
+              <div class="ops-list">
+                <div class="ops-rule">
+                  <div><strong>Roy</strong><span>Mo 每月 10 日匯 NT$3,000 至國泰世華帳戶末四碼 5011。</span></div>
+                  <span class="ops-pill">固定</span>
+                </div>
+                <div class="ops-rule">
+                  <div><strong>Eason</strong><span>Lisa 每月 10 日匯 NT$3,000 至國泰世華帳戶末四碼 7578。</span></div>
+                  <span class="ops-pill">固定</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="ops-panel">
               <h3>條件觸發規則</h3>
               <div class="ops-list" id="opsConditionList"></div>
             </section>
@@ -2090,12 +2104,8 @@
 
     const opsRules = [
       { id: "lisa-richart", type: "monthlyDay", day: 1, icon: "💰", action: "匯 Lisa 台新 Richart", amount: 46200, owner: "morpheus", recipient: "lisa" },
-      { id: "lele-00646-01", type: "monthlyDay", day: 1, icon: "📈", action: "匯入 Roy 投資帳戶：00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；每月定期投資", amount: 1000, owner: "both" },
-      { id: "zhenzhen-0050-01", type: "monthlyDay", day: 1, icon: "📈", action: "匯入 Eason 投資帳戶：0050", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 1200, owner: "both" },
-      { id: "lele-00646-15", type: "monthlyDay", day: 15, icon: "📈", action: "匯入 Roy 投資帳戶：00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；每月定期投資", amount: 1000, owner: "both" },
-      { id: "zhenzhen-0050-15", type: "monthlyDay", day: 15, icon: "📈", action: "匯入 Eason 投資帳戶：0050", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 1200, owner: "both" },
-      { id: "zhenzhen-00662-15", type: "monthlyDay", day: 15, icon: "📈", action: "匯入 Eason 投資帳戶：00662 Nasdaq", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 600, owner: "both" },
-      { id: "lele-00646-30", type: "monthlyDay", day: 30, icon: "📈", action: "匯入 Roy 投資帳戶：00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；2 月不執行", amount: 1000, owner: "both" },
+      { id: "roy-invest-transfer", type: "monthlyDay", day: 10, icon: "📈", action: "Mo 匯 Roy 投資帳戶", detail: "國泰世華帳戶末四碼 5011", amount: 3000, owner: "morpheus", recipient: "roy" },
+      { id: "eason-invest-transfer", type: "monthlyDay", day: 10, icon: "📈", action: "Lisa 匯 Eason 投資帳戶", detail: "國泰世華帳戶末四碼 7578", amount: 3000, owner: "lisa", recipient: "eason" },
       { id: "roy-policy-aug", type: "yearlyDate", month: 8, day: 26, icon: "🏥", action: "Roy 保單扣款", detail: "南山 U012119361 + U012119370", amount: 20627, owner: "morpheus" },
       { id: "eason-policy", type: "yearlyDate", month: 9, day: 2, icon: "🏥", action: "Eason 保單扣款", detail: "南山 U020553906 + U020553919 + U020553922", amount: 46971, owner: "morpheus" },
       { id: "roy-birthday", type: "yearlyDate", month: 10, day: 23, icon: "🎂", action: "Roy 生日", owner: "both" },
