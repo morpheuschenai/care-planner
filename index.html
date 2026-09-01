@@ -1758,7 +1758,7 @@
         <div class="school-page">
           <div>
             <section class="school-panel">
-              <h3>樂樂基本資料</h3>
+              <h3>Roy 基本資料</h3>
               <p class="school-note">固定資料集中放在這裡，之後有 Gmail 更新班級、座號或學號時，直接更新同一區。</p>
               <div class="profile-grid">
                 <div class="profile-item"><span>姓名</span><strong>陳奕樂</strong></div>
@@ -1812,7 +1812,7 @@
             </section>
 
             <section class="school-panel">
-              <h3>真真基本資料</h3>
+              <h3>Eason 基本資料</h3>
               <p class="school-note">目前先記錄新學期班級和本週需要注意的活動；娃娃車時間待新學期確認。</p>
               <div class="profile-grid">
                 <div class="profile-item"><span>姓名</span><strong>陳奕真</strong></div>
@@ -1825,7 +1825,7 @@
             </section>
 
             <section class="school-panel">
-              <h3>真真本週與近期注意事項</h3>
+              <h3>Eason 本週與近期注意事項</h3>
               <div class="attention-list">
                 <div class="attention-item">
                   <span>8/31（一）</span>
@@ -1842,7 +1842,7 @@
                 <div class="attention-item">
                   <span>9/3（四）</span>
                   <strong>投遞敬老日卡片
-                    <small>幼稚園安排投遞真真製作的敬老日卡片。</small>
+                    <small>幼稚園安排投遞 Eason 製作的敬老日卡片。</small>
                   </strong>
                 </div>
                 <div class="attention-item">
@@ -1995,8 +1995,8 @@
     };
 
     const careChildren = [
-      { id: "zhenzhen", label: "真真" },
-      { id: "lele", label: "樂樂" }
+      { id: "zhenzhen", label: "Eason" },
+      { id: "lele", label: "Roy" }
     ];
 
     const modules = {
@@ -2079,26 +2079,23 @@
 
     const defaultTimeRules = {
       morning_dropoff: [
-        { start: "2026-07-10", end: "2026-07-20", text: "真真 7:30 / 樂樂 8:00" },
+        { start: "2026-07-10", end: "2026-07-20", text: "Eason 7:30 / Roy 8:00" },
         { start: "2026-07-21", end: "", text: "待確認" }
       ],
       school_pickup: [
-        { start: "2026-07-10", end: "2026-07-20", text: "真真 15:30；樂樂 週一 14:00 / 週二 15:00 / 週三 18:00 / 週四 15:00 / 週五 15:00" },
+        { start: "2026-07-10", end: "2026-07-20", text: "Eason 15:30；Roy 週一 14:00 / 週二 15:00 / 週三 18:00 / 週四 15:00 / 週五 15:00" },
         { start: "2026-07-21", end: "", text: "待確認" }
       ]
     };
 
     const opsRules = [
       { id: "lisa-richart", type: "monthlyDay", day: 1, icon: "💰", action: "匯 Lisa 台新 Richart", amount: 46200, owner: "morpheus", recipient: "lisa" },
-      { id: "lele-00646-01", type: "monthlyDay", day: 1, icon: "📈", action: "樂樂 00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；每月定期投資", amount: 1000, owner: "both" },
-      { id: "zhenzhen-0050-01", type: "monthlyDay", day: 1, icon: "📈", action: "真真 0050", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 1200, owner: "both" },
-      { id: "lele-00646-15", type: "monthlyDay", day: 15, icon: "📈", action: "樂樂 00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；每月定期投資", amount: 1000, owner: "both" },
-      { id: "zhenzhen-0050-15", type: "monthlyDay", day: 15, icon: "📈", action: "真真 0050", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 1200, owner: "both" },
-      { id: "zhenzhen-00662-15", type: "monthlyDay", day: 15, icon: "📈", action: "真真 00662 Nasdaq", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 600, owner: "both" },
-      { id: "lele-00646-30", type: "monthlyDay", day: 30, icon: "📈", action: "樂樂 00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；2 月不執行", amount: 1000, owner: "both" },
-      { id: "roy-invest-morpheus", type: "monthlyDay", day: 10, icon: "💰", action: "Morpheus 負責 Roy", detail: "國泰世華帳號密碼待恢復", amount: 3000, owner: "morpheus", recipient: "roy" },
-      { id: "eason-invest-lisa", type: "monthlyDay", day: 10, icon: "💰", action: "Lisa 負責 Eason", detail: "活期儲蓄帳號 031-50-0227578", amount: 3000, owner: "lisa", recipient: "eason" },
-      { id: "eason-birthday", type: "yearlyDate", month: 8, day: 22, icon: "🎂", action: "Eason 生日", owner: "both" },
+      { id: "lele-00646-01", type: "monthlyDay", day: 1, icon: "📈", action: "匯入 Roy 投資帳戶：00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；每月定期投資", amount: 1000, owner: "both" },
+      { id: "zhenzhen-0050-01", type: "monthlyDay", day: 1, icon: "📈", action: "匯入 Eason 投資帳戶：0050", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 1200, owner: "both" },
+      { id: "lele-00646-15", type: "monthlyDay", day: 15, icon: "📈", action: "匯入 Roy 投資帳戶：00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；每月定期投資", amount: 1000, owner: "both" },
+      { id: "zhenzhen-0050-15", type: "monthlyDay", day: 15, icon: "📈", action: "匯入 Eason 投資帳戶：0050", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 1200, owner: "both" },
+      { id: "zhenzhen-00662-15", type: "monthlyDay", day: 15, icon: "📈", action: "匯入 Eason 投資帳戶：00662 Nasdaq", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 600, owner: "both" },
+      { id: "lele-00646-30", type: "monthlyDay", day: 30, icon: "📈", action: "匯入 Roy 投資帳戶：00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；2 月不執行", amount: 1000, owner: "both" },
       { id: "roy-policy-aug", type: "yearlyDate", month: 8, day: 26, icon: "🏥", action: "Roy 保單扣款", detail: "南山 U012119361 + U012119370", amount: 20627, owner: "morpheus" },
       { id: "eason-policy", type: "yearlyDate", month: 9, day: 2, icon: "🏥", action: "Eason 保單扣款", detail: "南山 U020553906 + U020553919 + U020553922", amount: 46971, owner: "morpheus" },
       { id: "roy-birthday", type: "yearlyDate", month: 10, day: 23, icon: "🎂", action: "Roy 生日", owner: "both" },
@@ -2107,8 +2104,6 @@
     ];
 
     const opsPendingItems = [
-      { icon: "⚠️", title: "Roy 國泰世華帳號密碼恢復", detail: "9/24 由 Mo 帶樂樂辦理；完成後分享給 Lisa。", owner: "morpheus" },
-      { icon: "⚠️", title: "Roy / Eason 帳戶投資設定", detail: "投資標的已確認，由 Mo 負責設定。", owner: "morpheus" },
       { icon: "⚠️", title: "秋季開學學校資訊", detail: "每學期開學後 14 日內 Lisa 提供", owner: "lisa" }
     ];
 
@@ -2291,7 +2286,7 @@
 
     function upgradeKnownRuleText(text) {
       return text === "真真 15:30；樂樂依星期調整"
-        ? "真真 15:30；樂樂 週一 14:00 / 週二 15:00 / 週三 18:00 / 週四 15:00 / 週五 15:00"
+        ? "Eason 15:30；Roy 週一 14:00 / 週二 15:00 / 週三 18:00 / 週四 15:00 / 週五 15:00"
         : text;
     }
 
@@ -3118,8 +3113,6 @@
 
     function compactOpsLabel(event) {
       if (event.id === "lisa-richart") return "Lisa";
-      if (event.id === "roy-invest-morpheus") return "Roy";
-      if (event.id === "eason-invest-lisa") return "Eason";
       if (event.action.includes("保單")) return event.action.replace("扣款", "");
       if (event.action.includes("生日")) return event.action;
       if (event.action.includes("報稅")) return "報稅";
