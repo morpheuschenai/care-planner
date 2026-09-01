@@ -2394,10 +2394,15 @@
       return `<span class="owner-tag" data-owner="${owner}">${ownerLabel(owner)}</span>`;
     }
 
+    function setInvestmentVaultFormVisible(visible) {
+      investmentVaultForm.hidden = !visible;
+      investmentVaultForm.style.display = visible ? "" : "none";
+    }
+
     function closeInvestmentVault() {
       investmentVaultDialog.classList.remove("open");
       investmentVaultForm.reset();
-      investmentVaultForm.hidden = false;
+      setInvestmentVaultFormVisible(true);
       investmentVaultResult.hidden = true;
       investmentVaultResult.innerHTML = "";
       investmentVaultSubtitle.textContent = "輸入密碼後查看完整帳號、登入提示與固定投資明細。解鎖提示：爸爸＋媽媽手機末三碼。";
@@ -2437,7 +2442,7 @@
         });
       });
       investmentVaultSubtitle.textContent = "資料只在本次開啟期間顯示；網銀與證券提示需點擊後查看，關閉視窗後會再次鎖定。";
-      investmentVaultForm.hidden = true;
+      setInvestmentVaultFormVisible(false);
       investmentVaultResult.hidden = false;
     }
 
