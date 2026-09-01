@@ -2090,6 +2090,12 @@
 
     const opsRules = [
       { id: "lisa-richart", type: "monthlyDay", day: 1, icon: "💰", action: "匯 Lisa 台新 Richart", amount: 46200, owner: "morpheus", recipient: "lisa" },
+      { id: "lele-00646-01", type: "monthlyDay", day: 1, icon: "📈", action: "樂樂 00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；每月定期投資", amount: 1000, owner: "both" },
+      { id: "zhenzhen-0050-01", type: "monthlyDay", day: 1, icon: "📈", action: "真真 0050", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 1200, owner: "both" },
+      { id: "lele-00646-15", type: "monthlyDay", day: 15, icon: "📈", action: "樂樂 00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；每月定期投資", amount: 1000, owner: "both" },
+      { id: "zhenzhen-0050-15", type: "monthlyDay", day: 15, icon: "📈", action: "真真 0050", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 1200, owner: "both" },
+      { id: "zhenzhen-00662-15", type: "monthlyDay", day: 15, icon: "📈", action: "真真 00662 Nasdaq", detail: "國泰世華帳戶末四碼 7578；每月定期投資", amount: 600, owner: "both" },
+      { id: "lele-00646-30", type: "monthlyDay", day: 30, icon: "📈", action: "樂樂 00646 S&P 500", detail: "國泰世華帳戶末四碼 5011；2 月不執行", amount: 1000, owner: "both" },
       { id: "roy-invest-morpheus", type: "monthlyDay", day: 10, icon: "💰", action: "Morpheus 負責 Roy", detail: "國泰世華帳號密碼待恢復", amount: 3000, owner: "morpheus", recipient: "roy" },
       { id: "eason-invest-lisa", type: "monthlyDay", day: 10, icon: "💰", action: "Lisa 負責 Eason", detail: "活期儲蓄帳號 031-50-0227578", amount: 3000, owner: "lisa", recipient: "eason" },
       { id: "eason-birthday", type: "yearlyDate", month: 8, day: 22, icon: "🎂", action: "Eason 生日", owner: "both" },
@@ -2232,7 +2238,10 @@
         if (rule.type === "monthlyDay") {
           monthKeys.forEach((monthKey) => {
             const [year, monthIndex] = monthKey.split("-").map(Number);
-            events.push({ ...rule, dateKey: toKey(new Date(year, monthIndex, rule.day)) });
+            const date = new Date(year, monthIndex, rule.day);
+            if (date.getMonth() === monthIndex && date.getDate() === rule.day) {
+              events.push({ ...rule, dateKey: toKey(date) });
+            }
           });
         }
 
