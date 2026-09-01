@@ -345,9 +345,9 @@
 
     .week-board {
       display: grid;
-      grid-template-columns: 112px repeat(14, 118px);
+      grid-template-columns: 112px repeat(14, 136px);
       grid-template-rows: 68px repeat(3, 118px);
-      min-width: 1764px;
+      min-width: 2016px;
     }
 
     .board-corner,
@@ -485,8 +485,7 @@
 
     .ops-day-chip {
       display: grid;
-      grid-template-columns: 18px minmax(0, 1fr);
-      gap: 5px;
+      grid-template-columns: minmax(0, 1fr);
       align-items: start;
       padding: 6px 7px;
       color: #433722;
@@ -498,21 +497,11 @@
       line-height: 1.2;
     }
 
-    .ops-day-chip span:last-child {
-      min-width: 0;
-    }
-
-    .ops-day-chip strong,
-    .ops-day-chip em {
+    .ops-day-chip strong {
       display: block;
-      overflow-wrap: anywhere;
-      font-style: normal;
-    }
-
-    .ops-day-chip em {
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .ops-day-more {
@@ -747,30 +736,6 @@
       line-height: 1;
     }
 
-    .perspective-switch {
-      display: inline-flex;
-      gap: 4px;
-      padding: 4px;
-      background: rgba(255, 250, 240, .82);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-    }
-
-    .perspective-switch button {
-      min-height: 32px;
-      padding: 7px 12px;
-      color: var(--muted);
-      background: transparent;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .perspective-switch button.active {
-      color: #fff;
-      background: var(--mo);
-    }
-
     .ops-panel {
       padding: 14px;
       background: rgba(255, 250, 240, .82);
@@ -804,6 +769,39 @@
       font-size: 11px;
       font-weight: 800;
       white-space: nowrap;
+    }
+
+    .owner-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 62px;
+      min-height: 28px;
+      padding: 5px 9px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .owner-tag[data-owner="morpheus"] {
+      color: #113d39;
+      background: var(--mo-soft);
+      border-color: rgba(31, 111, 104, .24);
+    }
+
+    .owner-tag[data-owner="lisa"] {
+      color: #65311f;
+      background: var(--lisa-soft);
+      border-color: rgba(154, 79, 52, .24);
+    }
+
+    .owner-tag[data-owner="both"] {
+      color: #453817;
+      background: #f6edcc;
+      border-color: rgba(198, 161, 91, .34);
     }
 
     .ops-timeline,
@@ -900,19 +898,11 @@
       border-color: rgba(198, 161, 91, .28);
     }
 
-    .add-rule-button,
     .agreement-button {
       width: 100%;
       min-height: 40px;
       border-radius: var(--radius);
       font-weight: 800;
-    }
-
-    .add-rule-button {
-      margin-bottom: 9px;
-      color: var(--mo);
-      background: rgba(223, 241, 236, .42);
-      border: 1px dashed rgba(31, 111, 104, .4);
     }
 
     .agreement-button {
@@ -1566,14 +1556,6 @@
         font-size: 28px;
       }
 
-      .perspective-switch {
-        width: 100%;
-      }
-
-      .perspective-switch button {
-        flex: 1;
-      }
-
       .ops-event {
         grid-template-columns: 56px 30px minmax(0, 1fr);
       }
@@ -1716,16 +1698,12 @@
       <section class="app-view" id="opsView">
         <div class="ops-head">
           <h2>共同事務</h2>
-          <div class="perspective-switch" aria-label="視角切換">
-            <button class="active" data-perspective="morpheus" type="button">Morpheus</button>
-            <button data-perspective="lisa" type="button">Lisa</button>
-          </div>
         </div>
 
         <div class="ops-page">
           <div>
             <section class="ops-panel">
-              <h3><span>未來 30 天時間軸</span><span class="ops-pill" id="opsViewLabel">你要主動處理</span></h3>
+              <h3>未來 30 天時間軸</h3>
               <div class="ops-timeline" id="opsTimeline"></div>
             </section>
 
@@ -1737,8 +1715,7 @@
 
           <aside>
             <section class="ops-panel">
-              <h3>循環規則設定</h3>
-              <button class="add-rule-button" type="button">＋ 新增規則</button>
+              <h3>循環規則</h3>
               <div class="ops-list" id="opsRuleList"></div>
             </section>
 
@@ -1747,11 +1724,11 @@
               <div class="ops-list">
                 <div class="ops-rule">
                   <div><strong>Roy</strong><span>Mo 每月 10 日匯 NT$3,000 至國泰世華帳戶末四碼 5011。</span></div>
-                  <span class="ops-pill">固定</span>
+                  <span class="owner-tag" data-owner="morpheus">Morpheus</span>
                 </div>
                 <div class="ops-rule">
                   <div><strong>Eason</strong><span>Lisa 每月 10 日匯 NT$3,000 至國泰世華帳戶末四碼 7578。</span></div>
-                  <span class="ops-pill">固定</span>
+                  <span class="owner-tag" data-owner="lisa">Lisa</span>
                 </div>
               </div>
             </section>
@@ -2170,8 +2147,6 @@
     const careView = document.querySelector("#careView");
     const opsView = document.querySelector("#opsView");
     const schoolView = document.querySelector("#schoolView");
-    const perspectiveButtons = document.querySelectorAll("[data-perspective]");
-    const opsViewLabel = document.querySelector("#opsViewLabel");
     const opsTimeline = document.querySelector("#opsTimeline");
     const opsPendingList = document.querySelector("#opsPendingList");
     const opsRuleList = document.querySelector("#opsRuleList");
@@ -2187,7 +2162,6 @@
     let editBaseline = null;
     let syncInFlight = false;
     let activeView = "care";
-    let opsPerspective = "morpheus";
 
     function toDate(dateKey) {
       return new Date(`${dateKey}T00:00:00`);
@@ -2278,9 +2252,12 @@
       return "條件觸發";
     }
 
-    function opsEventVisibleTo(event) {
-      if (opsPerspective === "morpheus") return event.owner === "morpheus" || event.owner === "both";
-      return event.owner === "lisa" || event.owner === "both" || event.recipient === "lisa";
+    function ownerLabel(owner) {
+      return owner === "morpheus" ? "Morpheus" : owner === "lisa" ? "Lisa" : "Both";
+    }
+
+    function ownerTag(owner) {
+      return `<span class="owner-tag" data-owner="${owner}">${ownerLabel(owner)}</span>`;
     }
 
     function switchView(view) {
@@ -2983,7 +2960,7 @@
         renderMobileBoard();
         return;
       }
-      board.style.gridTemplateColumns = `112px repeat(${state.visibleDays}, 118px)`;
+      board.style.gridTemplateColumns = `112px repeat(${state.visibleDays}, 136px)`;
       board.style.gridTemplateRows = "68px repeat(3, 118px) 96px";
       const weekdaySlots = modules[state.activeModule].weekdaySlots;
       const dates = getWeekDates();
@@ -3115,8 +3092,7 @@
       const amount = event.amount ? formatAmount(event.amount) : "";
       return `
         <div class="ops-day-chip" title="${escapeHtml(opsSummary(event))}">
-          <span>${event.icon}</span>
-          <span><strong>${escapeHtml(compactOpsLabel(event))}</strong>${amount ? `<em>${escapeHtml(amount)}</em>` : ""}</span>
+          <strong>${escapeHtml(`${compactOpsLabel(event)}${amount ? ` · ${amount}` : ""}`)}</strong>
         </div>
       `;
     }
@@ -3269,8 +3245,7 @@
 
     function renderOps() {
       const startKey = todayKey();
-      const events = generateOpsEvents(startKey, 30).filter(opsEventVisibleTo);
-      opsViewLabel.textContent = opsPerspective === "morpheus" ? "你要主動處理" : "你會收到 / 需要知道";
+      const events = generateOpsEvents(startKey, 30);
 
       opsTimeline.innerHTML = events.length
         ? events.map((event) => {
@@ -3286,21 +3261,17 @@
                 <strong>${escapeHtml(event.action)}${escapeHtml(amount)}</strong>
                 <span>${escapeHtml(event.detail || opsRuleLabel(event))}</span>
               </div>
-              <div class="ops-status ${statusClass}">${status}</div>
+              <div><div class="ops-status ${statusClass}">${status}</div>${ownerTag(event.owner)}</div>
             </div>
           `;
         }).join("")
         : `<div class="empty-state">未來 30 天沒有共同事務</div>`;
 
       opsPendingList.innerHTML = opsPendingItems
-        .filter((item) => {
-          if (opsPerspective === "morpheus") return item.owner === "morpheus" || item.owner === "both";
-          return item.owner === "lisa" || item.owner === "both";
-        })
         .map((item) => `
           <div class="ops-rule pending">
             <div><strong>${item.icon} ${escapeHtml(item.title)}</strong><span>${escapeHtml(item.detail)}</span></div>
-            <span class="ops-pill">待討論</span>
+            ${ownerTag(item.owner)}
           </div>
         `).join("");
 
@@ -3309,7 +3280,7 @@
         return `
           <div class="ops-rule">
             <div><strong>${rule.icon} ${escapeHtml(opsRuleLabel(rule))}</strong><span>${escapeHtml(rule.action)}${escapeHtml(amount)}</span></div>
-            <span class="ops-pill">編輯</span>
+            ${ownerTag(rule.owner)}
           </div>
         `;
       }).join("");
@@ -3317,6 +3288,7 @@
       opsConditionList.innerHTML = opsConditionRules.map((text) => `
         <div class="ops-rule">
           <div><strong>🔔 ${escapeHtml(text)}</strong><span>只做提醒與速查，不排進日曆。</span></div>
+          ${ownerTag("both")}
         </div>
       `).join("");
     }
@@ -3500,13 +3472,6 @@
     redoButton.addEventListener("click", redo);
     viewTabs.forEach((button) => {
       button.addEventListener("click", () => switchView(button.dataset.view));
-    });
-    perspectiveButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        opsPerspective = button.dataset.perspective;
-        perspectiveButtons.forEach((item) => item.classList.toggle("active", item === button));
-        renderOps();
-      });
     });
     document.querySelector("#prevWeek").addEventListener("click", () => {
       pauseAutoExtend();
