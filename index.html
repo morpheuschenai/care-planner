@@ -1371,6 +1371,10 @@
       gap: 12px;
     }
 
+    .vault-form[hidden] {
+      display: none !important;
+    }
+
     .vault-form input {
       min-height: 42px;
       padding: 8px 10px;
@@ -1419,15 +1423,19 @@
       color: var(--ink);
       background: transparent;
       border: 0;
-      filter: blur(6px);
+      -webkit-filter: blur(10px);
+      filter: blur(10px);
       font-weight: 800;
       line-height: inherit;
       text-align: left;
+      user-select: none;
       transition: filter .16s ease;
     }
 
     .vault-hint.revealed {
-      filter: none;
+      -webkit-filter: none !important;
+      filter: none !important;
+      user-select: text;
     }
 
     .vault-plan-list {
