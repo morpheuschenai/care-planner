@@ -892,6 +892,23 @@
       font-weight: 800;
     }
 
+    .vault-button {
+      width: 100%;
+      min-height: 40px;
+      color: #fff;
+      background: var(--ink);
+      border: 1px solid var(--ink);
+      border-radius: var(--radius);
+      font-weight: 800;
+    }
+
+    .vault-note {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .agreement-button {
       color: #fff;
       background: var(--ink);
@@ -1349,6 +1366,79 @@
       border-color: var(--ink);
     }
 
+    .vault-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .vault-form input {
+      min-height: 42px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .62);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .vault-result {
+      display: grid;
+      gap: 10px;
+    }
+
+    .vault-account {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(255, 255, 255, .36);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .vault-account h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .vault-row {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 10px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .vault-row span {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .vault-plan-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .vault-plan {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 10px;
+      background: rgba(246, 237, 204, .52);
+      border: 1px solid rgba(198, 161, 91, .28);
+      border-radius: var(--radius);
+      font-size: 12px;
+    }
+
+    .vault-plan strong,
+    .vault-plan span {
+      display: block;
+    }
+
+    .vault-plan span {
+      margin-top: 2px;
+      color: var(--muted);
+    }
+
     .icon-button:disabled {
       opacity: .42;
       cursor: not-allowed;
@@ -1716,6 +1806,12 @@
             </section>
 
             <section class="ops-panel">
+              <h3>投資帳戶資料</h3>
+              <p class="vault-note">完整匯款帳號、登入提示與固定投資明細需解鎖後查看。</p>
+              <button class="vault-button" id="openInvestmentVault" type="button">查看投資帳戶資料</button>
+            </section>
+
+            <section class="ops-panel">
               <h3>條件觸發規則</h3>
               <div class="ops-list" id="opsConditionList"></div>
             </section>
@@ -1949,12 +2045,36 @@
     </div>
   </div>
 
+  <div class="time-rule-dialog" id="investmentVaultDialog" role="dialog" aria-modal="true" aria-label="投資帳戶資料">
+    <div class="time-rule-form">
+      <div class="time-rule-form-head">
+        <div>
+          <strong>投資帳戶資料</strong>
+          <span id="investmentVaultSubtitle">輸入密碼後查看完整帳號、登入提示與固定投資明細。</span>
+        </div>
+        <button class="popover-close" id="closeInvestmentVault" type="button" aria-label="關閉">×</button>
+      </div>
+      <form class="vault-form" id="investmentVaultForm">
+        <div class="form-field">
+          <label for="investmentVaultPassword">解鎖密碼</label>
+          <input id="investmentVaultPassword" type="password" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <div class="time-rule-actions">
+          <button class="primary" id="unlockInvestmentVault" type="submit">解鎖</button>
+        </div>
+      </form>
+      <div class="vault-result" id="investmentVaultResult" hidden></div>
+    </div>
+  </div>
+
   <script>
     const STORAGE_KEY = "family-ops-care-module-v2";
     const STORAGE_BACKUP_KEY = "family-ops-care-module-v2-backups";
     const SYNC_TOKEN_KEY = "family-ops-care-sync-token";
     const CARE_PLANNER_SYNC_URL = "https://web-production-ee902.up.railway.app/api/care-planner/sync";
     const CARE_PLANNER_STATE_URL = "https://web-production-ee902.up.railway.app/api/care-planner/state";
+    const CARE_PLANNER_VAULT_UNLOCK_URL = "https://web-production-ee902.up.railway.app/api/care-planner/investment-vault/unlock";
+    const CARE_PLANNER_VAULT_DETAILS_URL = "https://web-production-ee902.up.railway.app/api/care-planner/investment-vault/details";
     const CARE_PLANNER_CALENDAR_ID = "f6v16h6sav5134f00ovglhunqo@group.calendar.google.com";
     const CARE_PLANNER_SYNC_TOKEN = "uB4FvFyJGp-G3BDb0DA4pIe48i5Ic2Em6za8LXiHyZ4";
     const INITIAL_VISIBLE_DAYS = 14;
@@ -2137,6 +2257,11 @@
     const timeRuleStartInput = document.querySelector("#timeRuleStart");
     const timeRuleEndInput = document.querySelector("#timeRuleEnd");
     const timeRuleQuestionnaire = document.querySelector("#timeRuleQuestionnaire");
+    const investmentVaultDialog = document.querySelector("#investmentVaultDialog");
+    const investmentVaultForm = document.querySelector("#investmentVaultForm");
+    const investmentVaultPassword = document.querySelector("#investmentVaultPassword");
+    const investmentVaultSubtitle = document.querySelector("#investmentVaultSubtitle");
+    const investmentVaultResult = document.querySelector("#investmentVaultResult");
     let activeSlot = null;
     let activeTimeRuleGroup = null;
     let autoExtendPausedUntil = 0;
@@ -2144,6 +2269,7 @@
     let editBaseline = null;
     let syncInFlight = false;
     let activeView = "care";
+    let investmentVaultToken = "";
 
     function toDate(dateKey) {
       return new Date(`${dateKey}T00:00:00`);
@@ -2240,6 +2366,86 @@
 
     function ownerTag(owner) {
       return `<span class="owner-tag" data-owner="${owner}">${ownerLabel(owner)}</span>`;
+    }
+
+    function closeInvestmentVault() {
+      investmentVaultDialog.classList.remove("open");
+      investmentVaultForm.reset();
+      investmentVaultForm.hidden = false;
+      investmentVaultResult.hidden = true;
+      investmentVaultResult.innerHTML = "";
+      investmentVaultSubtitle.textContent = "輸入密碼後查看完整帳號、登入提示與固定投資明細。";
+      investmentVaultToken = "";
+    }
+
+    function openInvestmentVault() {
+      investmentVaultDialog.classList.add("open");
+      investmentVaultPassword.focus();
+    }
+
+    function renderInvestmentVault(vault) {
+      const accounts = Array.isArray(vault.accounts) ? vault.accounts : [];
+      investmentVaultResult.innerHTML = accounts.map((account) => {
+        const plans = Array.isArray(account.investmentPlans) ? account.investmentPlans : [];
+        return `
+          <section class="vault-account">
+            <h3>${escapeHtml(account.name || "")}</h3>
+            <div class="vault-row"><span>匯款帳戶</span><strong>${escapeHtml(account.bank || "")} ${escapeHtml(account.accountNumber || "")}</strong></div>
+            <div class="vault-row"><span>網銀提示</span><strong>${escapeHtml(account.bankPasswordHint || "")}</strong></div>
+            <div class="vault-row"><span>證券提示</span><strong>${escapeHtml(account.securitiesPasswordHint || "")}</strong></div>
+            <div class="vault-plan-list">
+              ${plans.map((plan) => `
+                <div class="vault-plan">
+                  <div><strong>${escapeHtml(plan.name || "")}</strong><span>${escapeHtml(plan.schedule || "")}</span></div>
+                  <strong>${escapeHtml(plan.amount || "")}</strong>
+                </div>
+              `).join("")}
+            </div>
+          </section>
+        `;
+      }).join("") || `<div class="empty-state">目前沒有投資帳戶資料</div>`;
+      investmentVaultSubtitle.textContent = "資料只在本次開啟期間顯示，關閉視窗後會再次鎖定。";
+      investmentVaultForm.hidden = true;
+      investmentVaultResult.hidden = false;
+    }
+
+    async function unlockInvestmentVault(event) {
+      event.preventDefault();
+      const password = investmentVaultPassword.value;
+      if (!password) return;
+
+      const button = document.querySelector("#unlockInvestmentVault");
+      button.disabled = true;
+      button.textContent = "解鎖中";
+      try {
+        const unlockResponse = await fetch(CARE_PLANNER_VAULT_UNLOCK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password })
+        });
+        const unlockResult = await unlockResponse.json().catch(() => ({}));
+        if (!unlockResponse.ok || !unlockResult.accessToken) {
+          if (unlockResponse.status === 429 && unlockResult.retryAfter) {
+            throw new Error(`嘗試次數過多，請在 ${Math.ceil(unlockResult.retryAfter / 60)} 分鐘後再試`);
+          }
+          throw new Error(unlockResponse.status === 401 ? "密碼不正確" : "暫時無法開啟資料");
+        }
+
+        investmentVaultToken = unlockResult.accessToken;
+        const detailsResponse = await fetch(CARE_PLANNER_VAULT_DETAILS_URL, {
+          headers: { Authorization: `Bearer ${investmentVaultToken}` }
+        });
+        const detailsResult = await detailsResponse.json().catch(() => ({}));
+        if (!detailsResponse.ok || !detailsResult.vault) throw new Error("暫時無法讀取資料");
+        investmentVaultPassword.value = "";
+        renderInvestmentVault(detailsResult.vault);
+      } catch (error) {
+        investmentVaultToken = "";
+        investmentVaultSubtitle.textContent = error.message || "暫時無法開啟資料";
+      } finally {
+        button.disabled = false;
+        button.textContent = "解鎖";
+      }
     }
 
     function switchView(view) {
@@ -3484,6 +3690,9 @@
     });
     document.querySelector("#downloadIcs").addEventListener("click", downloadIcs);
     syncButton.addEventListener("click", syncToCalendar);
+    document.querySelector("#openInvestmentVault").addEventListener("click", openInvestmentVault);
+    document.querySelector("#closeInvestmentVault").addEventListener("click", closeInvestmentVault);
+    investmentVaultForm.addEventListener("submit", unlockInvestmentVault);
     document.querySelector("#closePopover").addEventListener("click", closePopover);
     document.querySelector("#closeTimeRuleDialog").addEventListener("click", closeTimeRuleDialog);
     document.querySelector("#cancelTimeRuleEdit").addEventListener("click", closeTimeRuleDialog);
@@ -3504,6 +3713,7 @@
       if (event.key === "Escape") {
         closePopover();
         closeTimeRuleDialog();
+        closeInvestmentVault();
         return;
       }
       const modifier = event.metaKey || event.ctrlKey;
