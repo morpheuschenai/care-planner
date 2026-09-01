@@ -1412,6 +1412,24 @@
       font-weight: 800;
     }
 
+    .vault-hint {
+      width: fit-content;
+      max-width: 100%;
+      padding: 0;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      filter: blur(6px);
+      font-weight: 800;
+      line-height: inherit;
+      text-align: left;
+      transition: filter .16s ease;
+    }
+
+    .vault-hint.revealed {
+      filter: none;
+    }
+
     .vault-plan-list {
       display: grid;
       gap: 6px;
@@ -2391,8 +2409,8 @@
           <section class="vault-account">
             <h3>${escapeHtml(account.name || "")}</h3>
             <div class="vault-row"><span>匯款帳戶</span><strong>${escapeHtml(account.bank || "")} ${escapeHtml(account.accountNumber || "")}</strong></div>
-            <div class="vault-row"><span>網銀提示</span><strong>${escapeHtml(account.bankPasswordHint || "")}</strong></div>
-            <div class="vault-row"><span>證券提示</span><strong>${escapeHtml(account.securitiesPasswordHint || "")}</strong></div>
+            <div class="vault-row"><span>網銀提示</span><button class="vault-hint" type="button" aria-label="顯示網銀提示">${escapeHtml(account.bankPasswordHint || "")}</button></div>
+            <div class="vault-row"><span>證券提示</span><button class="vault-hint" type="button" aria-label="顯示證券提示">${escapeHtml(account.securitiesPasswordHint || "")}</button></div>
             <div class="vault-plan-list">
               ${plans.map((plan) => `
                 <div class="vault-plan">
@@ -2404,7 +2422,13 @@
           </section>
         `;
       }).join("") || `<div class="empty-state">目前沒有投資帳戶資料</div>`;
-      investmentVaultSubtitle.textContent = "資料只在本次開啟期間顯示，關閉視窗後會再次鎖定。";
+      investmentVaultResult.querySelectorAll(".vault-hint").forEach((hint) => {
+        hint.addEventListener("click", () => {
+          const revealed = hint.classList.toggle("revealed");
+          hint.setAttribute("aria-label", revealed ? "隱藏提示" : "顯示提示");
+        });
+      });
+      investmentVaultSubtitle.textContent = "資料只在本次開啟期間顯示；網銀與證券提示需點擊後查看，關閉視窗後會再次鎖定。";
       investmentVaultForm.hidden = true;
       investmentVaultResult.hidden = false;
     }
