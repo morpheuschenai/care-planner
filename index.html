@@ -2157,6 +2157,7 @@
     const STORAGE_BACKUP_KEY = "family-ops-care-module-v2-backups";
     const SYNC_TOKEN_KEY = "family-ops-care-sync-token";
     const CARE_PLANNER_SYNC_URL = "https://web-production-ee902.up.railway.app/api/care-planner/sync";
+    const CARE_PLANNER_SYNC_STATUS_URL = "https://web-production-ee902.up.railway.app/api/care-planner/sync/status";
     const CARE_PLANNER_STATE_URL = "https://web-production-ee902.up.railway.app/api/care-planner/state";
     const CARE_PLANNER_VAULT_UNLOCK_URL = "https://web-production-ee902.up.railway.app/api/care-planner/investment-vault/unlock";
     const CARE_PLANNER_VAULT_DETAILS_URL = "https://web-production-ee902.up.railway.app/api/care-planner/investment-vault/details";
@@ -3816,6 +3817,24 @@
       return token;
     }
 
+    function wait(ms) {
+      return new Promise((resolve) => window.setTimeout(resolve, ms));
+    }
+
+    async function waitForCarePlannerSync(syncToken) {
+      for (let attempt = 0; attempt < 180; attempt += 1) {
+        await wait(2000);
+        const response = await fetch(CARE_PLANNER_SYNC_STATUS_URL, {
+          headers: { "Authorization": `Bearer ${syncToken}` }
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "無法確認同步狀態");
+        if (result.status === "completed") return result;
+        if (result.status === "failed") throw new Error(result.error || "同步失敗");
+      }
+      throw new Error("同步仍在處理中，請稍後重新開啟網站確認");
+    }
+
     async function syncToCalendar() {
       if (syncInFlight) return;
       const defaultToken = localStorage.getItem(SYNC_TOKEN_KEY) || CARE_PLANNER_SYNC_TOKEN;
@@ -3842,14 +3861,17 @@
           })
         });
         const result = await response.json().catch(() => ({}));
-        if (!response.ok) {
+        if (!response.ok && response.status !== 409) {
           if (response.status === 401) {
             localStorage.removeItem(SYNC_TOKEN_KEY);
             throw new Error("同步設定已失效，請聯絡維護者更新");
           }
           throw new Error(result.error || "同步失敗");
         }
-        const inserted = Number.isFinite(result.inserted) ? result.inserted : events.length;
+        const completed = result.status === "running" || response.status === 409
+          ? await waitForCarePlannerSync(syncToken)
+          : result;
+        const inserted = Number.isFinite(completed.inserted) ? completed.inserted : events.length;
         showToast(`已同步 ${inserted} / ${events.length} 筆`);
       } catch (error) {
         if (error instanceof TypeError) {
