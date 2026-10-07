@@ -3871,8 +3871,15 @@
         const completed = result.status === "running" || response.status === 409
           ? await waitForCarePlannerSync(syncToken)
           : result;
-        const inserted = Number.isFinite(completed.inserted) ? completed.inserted : events.length;
-        showToast(`已同步 ${inserted} / ${events.length} 筆`);
+        const inserted = Number.isFinite(completed.inserted) ? completed.inserted : 0;
+        const updated = Number.isFinite(completed.updated) ? completed.updated : 0;
+        const deleted = Number.isFinite(completed.deleted) ? completed.deleted : 0;
+        const changed = inserted + updated + deleted;
+        showToast(
+          changed
+            ? `日曆已同步：新增 ${inserted}、更新 ${updated}、移除 ${deleted}`
+            : "日曆已是最新狀態"
+        );
       } catch (error) {
         if (error instanceof TypeError) {
           showToast("同步服務目前無法連線");
